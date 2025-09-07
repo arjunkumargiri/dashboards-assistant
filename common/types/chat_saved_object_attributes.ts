@@ -49,6 +49,11 @@ export interface IInput {
   };
   messageId?: string;
   promptPrefix?: string;
+  images?: Array<{
+    data: string; // base64 encoded image data
+    mimeType: string; // image/png, image/jpeg, etc.
+    filename?: string;
+  }>;
 }
 export interface IOutput {
   type: 'output';
@@ -59,6 +64,13 @@ export interface IOutput {
   suggestedActions?: ISuggestedAction[];
   messageId?: string;
   fullWidth?: boolean;
+  traceId?: string; // for OpenSearch Agents integration
+  createTime?: string; // for OpenSearch Agents integration
+  sourceAttributions?: Array<{
+    title: string;
+    url: string;
+    body: string;
+  }>; // for OpenSearch Agents integration
 }
 export type IMessage = IInput | IOutput;
 

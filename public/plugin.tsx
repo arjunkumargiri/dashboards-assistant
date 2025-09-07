@@ -74,6 +74,7 @@ import {
   INDEX_PATTERN_URL_SEARCH_KEY,
 } from './components/visualization/text2viz';
 import { DEFAULT_DATA, createStorage } from '../../../src/plugins/data/common';
+import { initializeContextualChatPublicServices } from './services/contextual_chat_initializer';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -375,6 +376,14 @@ export class AssistantPlugin
     setUiActions(uiActions);
     setAssistantService(assistantServiceStart);
     setLocalStorage(createStorage({ engine: window.localStorage, prefix: 'dashboardsAssistant.' }));
+
+    // Initialize contextual chat services
+    try {
+      initializeContextualChatPublicServices(this.config, core);
+    } catch (error) {
+      console.error('Failed to initialize contextual chat public services:', error);
+      // Continue with plugin initialization
+    }
 
     if (this.config.text2viz.enabled) {
       uiActions.addTriggerAction(AI_ASSISTANT_QUERY_EDITOR_TRIGGER, {

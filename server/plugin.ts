@@ -28,11 +28,15 @@ import { capabilitiesProvider as visNLQCapabilitiesProvider } from './vis_type_n
 import { visNLQSavedObjectType } from './vis_type_nlq/saved_object_type';
 import { capabilitiesProvider } from './capabilities';
 import { ENABLE_AI_FEATURES } from './utils/constants';
+import { getContextualChatServiceRegistry } from './services/contextual_chat_service_registry';
+import { contextualChatSavedObjectTypes } from './saved_objects/contextual_chat_saved_objects';
+import { initializeContextualChatServices } from './services/contextual_chat_initializer';
 
 export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPluginStart> {
   private readonly logger: Logger;
   private messageParsers: MessageParser[] = [];
   private assistantService = new AssistantService();
+  private contextualChatServiceRegistry = getContextualChatServiceRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -47,11 +51,34 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
     const assistantServiceSetup = this.assistantService.setup();
 
+    // Initialize contextual chat service registry if enabled
+    if (config.contextualChat?.enabled) {
+      this.logger.info('Contextual chat feature is enabled (snapshot-based approach)');
+      
+      // Register contextual chat saved object types (if any)
+      if (contextualChatSavedObjectTypes.length > 0) {
+        contextualChatSavedObjectTypes.forEach(type => {
+          core.savedObjects.registerType(type);
+        });
+        this.logger.debug(`Registered ${contextualChatSavedObjectTypes.length} contextual chat saved object types`);
+      } else {
+        this.logger.debug('No contextual chat saved object types to register (snapshot-based approach)');
+      }
+      
+      // Initialize and register contextual chat services
+      try {
+        initializeContextualChatServices(config, this.logger);
+        this.logger.info('Contextual chat services initialized successfully');
+      } catch (error) {
+        this.logger.error('Failed to initialize contextual chat services:', error);
+        // Continue with plugin initialization even if contextual chat fails
+      }
+    }
+
     const router = core.http.createRouter();
 
     core.http.registerRouteHandlerContext('assistant_plugin', () => {
       return {
-        config,
         logger: this.logger,
       };
     });
@@ -60,6 +87,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
     // Register server side APIs
     registerChatRoutes(router, {
+      config,
       messageParsers: this.messageParsers,
       auth: core.http.auth,
     });
@@ -136,6 +164,7 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
 
         this.messageParsers.splice(findIndex, 1);
       },
+      contextualChatServiceRegistry: this.contextualChatServiceRegistry,
     };
   }
 

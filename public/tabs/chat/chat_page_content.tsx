@@ -207,13 +207,13 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
 
         return (
           <div
-            key={`${interaction?.conversation_id}-${i}`}
+            key={message.messageId || `${interaction?.conversation_id}-${i}`}
             ref={isLatestInput && isWaitingForRepsonse ? latestInputRef : undefined}
             style={
               isLatestOutput
                 ? {
-                    minHeight: messageSpacerHeight,
-                  }
+                  minHeight: messageSpacerHeight,
+                }
                 : {}
             }
           >

@@ -6,11 +6,14 @@
 import { IMessage, Interaction } from '../common/types/chat_saved_object_attributes';
 import { Logger, HttpAuth } from '../../../src/core/server';
 import { AssistantServiceSetup } from './services/assistant_service';
+import { ConfigSchema } from '../common/types/config';
+import { ContextualChatServiceRegistry } from './services/contextual_chat_service_registry';
 
 export interface AssistantPluginSetup {
   assistantService: AssistantServiceSetup;
   registerMessageParser: (message: MessageParser) => void;
   removeMessageParser: (parserId: MessageParser['id']) => void;
+  contextualChatServiceRegistry: ContextualChatServiceRegistry;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssistantPluginStart {}
@@ -41,6 +44,7 @@ export interface MessageParser {
 }
 
 export interface RoutesOptions {
+  config: ConfigSchema;
   messageParsers: MessageParser[];
   auth: HttpAuth;
 }

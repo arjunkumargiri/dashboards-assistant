@@ -1,0 +1,411 @@
+# Monitoring and Alerting Configuration for Contextual Dashboard Chat
+
+# Core monitoring settings
+monitoring:
+  enabled: true
+  
+  # Metrics collection
+  metrics:
+    # Collection interval in seconds
+    collection_interval: 30
+    
+    # Metrics retention period in days
+    retention_days: 30
+    
+    # Metrics storage backend
+    storage:
+      type: "elasticsearch"  # or "prometheus", "influxdb"
+      index: "contextual_chat_metrics"
+      
+      # Elasticsearch specific settings
+      elasticsearch:
+        hosts: ["localhost:9200"]
+        index_template: "contextual_chat_metrics_template"
+        
+    # Metrics to collect
+    enabled_metrics:
+      # Performance metrics
+      - "context_extraction_time"
+      - "context_extraction_size"
+      - "chat_response_time"
+      - "memory_usage"
+      - "cpu_usage"
+      
+      # Usage metrics
+      - "active_users"
+      - "context_extractions_per_minute"
+      - "chat_requests_per_minute"
+      - "feature_usage_rate"
+      
+      # Error metrics
+      - "extraction_error_rate"
+      - "chat_error_rate"
+      - "timeout_rate"
+      - "permission_denied_rate"
+      
+      # Quality metrics
+      - "context_relevance_score"
+      - "user_satisfaction_score"
+      - "chat_completion_rate"
+      
+  # Health checks
+  health_checks:
+    enabled: true
+    interval: 30  # seconds
+    timeout: 5    # seconds
+    
+    # Health check endpoints
+    endpoints:
+      - name: "context_service"
+        url: "/api/assistant/contextual-chat/health/context"
+        critical: true
+        
+      - name: "chat_service"
+        url: "/api/assistant/contextual-chat/health/chat"
+        critical: true
+        
+      - name: "extraction_service"
+        url: "/api/assistant/contextual-chat/health/extraction"
+        critical: false
+        
+    # Health check thresholds
+    thresholds:
+      response_time_warning: 1000   # ms
+      response_time_critical: 5000  # ms
+      error_rate_warning: 0.05     # 5%
+      error_rate_critical: 0.1     # 10%
+
+# Alerting configuration
+alerting:
+  enabled: true
+  
+  # Alert channels
+  channels:
+    email:
+      enabled: true
+      smtp_host: "smtp.company.com"
+      smtp_port: 587
+      from_address: "alerts@company.com"
+      recipients:
+        - "admin@company.com"
+        - "devops@company.com"
+        
+    slack:
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#opensearch-alerts"
+      username: "OpenSearch Alerts"
+      
+    pagerduty:
+      enabled: false
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+      
+    webhook:
+      enabled: false
+      url: "${CUSTOM_WEBHOOK_URL}"
+      headers:
+        Authorization: "Bearer ${WEBHOOK_TOKEN}"
+        
+  # Alert rules
+  rules:
+    # Performance alerts
+    high_extraction_time:
+      name: "High Context Extraction Time"
+      description: "Context extraction taking longer than expected"
+      metric: "context_extraction_time"
+      condition: "avg_over_time(5m) > 2000"  # 2 seconds
+      severity: "warning"
+      channels: ["email", "slack"]
+      
+    very_high_extraction_time:
+      name: "Very High Context Extraction Time"
+      description: "Context extraction critically slow"
+      metric: "context_extraction_time"
+      condition: "avg_over_time(5m) > 5000"  # 5 seconds
+      severity: "critical"
+      channels: ["email", "slack", "pagerduty"]
+      
+    high_memory_usage:
+      name: "High Memory Usage"
+      description: "Contextual chat using excessive memory"
+      metric: "memory_usage"
+      condition: "current() > 200000000"  # 200MB
+      severity: "warning"
+      channels: ["email", "slack"]
+      
+    # Error rate alerts
+    high_extraction_error_rate:
+      name: "High Context Extraction Error Rate"
+      description: "High rate of context extraction failures"
+      metric: "extraction_error_rate"
+      condition: "rate(5m) > 0.05"  # 5% error rate
+      severity: "warning"
+      channels: ["email", "slack"]
+      
+    critical_extraction_error_rate:
+      name: "Critical Context Extraction Error Rate"
+      description: "Critical rate of context extraction failures"
+      metric: "extraction_error_rate"
+      condition: "rate(5m) > 0.1"  # 10% error rate
+      severity: "critical"
+      channels: ["email", "slack", "pagerduty"]
+      
+    high_chat_error_rate:
+      name: "High Chat Error Rate"
+      description: "High rate of contextual chat failures"
+      metric: "chat_error_rate"
+      condition: "rate(5m) > 0.03"  # 3% error rate
+      severity: "warning"
+      channels: ["email", "slack"]
+      
+    # Usage alerts
+    low_feature_adoption:
+      name: "Low Feature Adoption"
+      description: "Contextual chat feature has low adoption rate"
+      metric: "feature_usage_rate"
+      condition: "avg_over_time(1h) < 0.1"  # Less than 10% usage
+      severity: "info"
+      channels: ["email"]
+      
+    high_load:
+      name: "High System Load"
+      description: "High number of concurrent contextual chat requests"
+      metric: "context_extractions_per_minute"
+      condition: "current() > 1000"  # More than 1000 extractions per minute
+      severity: "warning"
+      channels: ["email", "slack"]
+      
+    # Quality alerts
+    low_user_satisfaction:
+      name: "Low User Satisfaction"
+      description: "User satisfaction score below threshold"
+      metric: "user_satisfaction_score"
+      condition: "avg_over_time(1h) < 3.0"  # Below 3.0 out of 5
+      severity: "warning"
+      channels: ["email"]
+      
+    # Security alerts
+    high_permission_denied_rate:
+      name: "High Permission Denied Rate"
+      description: "High rate of permission denied errors"
+      metric: "permission_denied_rate"
+      condition: "rate(5m) > 0.02"  # 2% permission denied rate
+      severity: "warning"
+      channels: ["email", "slack"]
+      
+  # Alert suppression
+  suppression:
+    # Suppress duplicate alerts within time window
+    duplicate_suppression_window: 300  # 5 minutes
+    
+    # Maintenance windows (no alerts during these times)
+    maintenance_windows:
+      - name: "Weekly Maintenance"
+        schedule: "0 2 * * 0"  # Every Sunday at 2 AM
+        duration: 120  # 2 hours
+        
+  # Alert escalation
+  escalation:
+    enabled: true
+    
+    # Escalation rules
+    rules:
+      - name: "Critical Alert Escalation"
+        condition: "severity == 'critical' AND unacknowledged_for > 300"  # 5 minutes
+        action: "escalate_to_oncall"
+        
+      - name: "Warning Alert Escalation"
+        condition: "severity == 'warning' AND unacknowledged_for > 1800"  # 30 minutes
+        action: "escalate_to_manager"
+
+# Dashboard configuration
+dashboards:
+  enabled: true
+  
+  # Dashboard platform
+  platform: "grafana"  # or "kibana", "custom"
+  
+  # Grafana configuration
+  grafana:
+    url: "http://grafana.company.com"
+    api_key: "${GRAFANA_API_KEY}"
+    
+    # Dashboard definitions
+    dashboards:
+      - name: "Contextual Chat Overview"
+        file: "dashboards/contextual_chat_overview.json"
+        folder: "OpenSearch Dashboards"
+        
+      - name: "Contextual Chat Performance"
+        file: "dashboards/contextual_chat_performance.json"
+        folder: "OpenSearch Dashboards"
+        
+      - name: "Contextual Chat Errors"
+        file: "dashboards/contextual_chat_errors.json"
+        folder: "OpenSearch Dashboards"
+        
+  # Custom dashboard configuration
+  custom_dashboards:
+    - name: "Real-time Monitoring"
+      url: "/app/dashboards/contextual-chat-realtime"
+      refresh_interval: 30
+      
+    - name: "Historical Analysis"
+      url: "/app/dashboards/contextual-chat-historical"
+      refresh_interval: 300
+
+# Log monitoring
+log_monitoring:
+  enabled: true
+  
+  # Log aggregation
+  aggregation:
+    platform: "elasticsearch"  # or "splunk", "fluentd"
+    
+    # Log patterns to monitor
+    patterns:
+      - name: "Context Extraction Errors"
+        pattern: "ERROR.*context.*extraction.*failed"
+        severity: "error"
+        alert_threshold: 10  # Alert if more than 10 occurrences in 5 minutes
+        
+      - name: "Chat Service Timeouts"
+        pattern: "WARN.*chat.*service.*timeout"
+        severity: "warning"
+        alert_threshold: 5
+        
+      - name: "Permission Denied"
+        pattern: "WARN.*permission.*denied.*contextual.*chat"
+        severity: "warning"
+        alert_threshold: 20
+        
+      - name: "Memory Warnings"
+        pattern: "WARN.*memory.*limit.*exceeded.*contextual"
+        severity: "warning"
+        alert_threshold: 3
+        
+  # Log retention
+  retention:
+    application_logs: 30  # days
+    error_logs: 90       # days
+    audit_logs: 365      # days
+
+# Performance monitoring
+performance_monitoring:
+  enabled: true
+  
+  # Application Performance Monitoring (APM)
+  apm:
+    enabled: true
+    service_name: "contextual-dashboard-chat"
+    
+    # Trace sampling
+    sampling_rate: 0.1  # 10% of requests
+    
+    # Custom metrics
+    custom_metrics:
+      - name: "context_extraction_duration"
+        type: "histogram"
+        description: "Time taken to extract context"
+        
+      - name: "context_size_bytes"
+        type: "histogram"
+        description: "Size of extracted context in bytes"
+        
+      - name: "active_extractions"
+        type: "gauge"
+        description: "Number of active context extractions"
+        
+  # Profiling
+  profiling:
+    enabled: false  # Enable only for debugging
+    sampling_rate: 0.01  # 1% of requests
+    
+# Synthetic monitoring
+synthetic_monitoring:
+  enabled: true
+  
+  # Synthetic tests
+  tests:
+    - name: "Context Extraction Test"
+      type: "api"
+      url: "/api/assistant/contextual-chat/test/extraction"
+      method: "POST"
+      interval: 300  # 5 minutes
+      timeout: 10    # seconds
+      expected_status: 200
+      
+    - name: "Chat Integration Test"
+      type: "api"
+      url: "/api/assistant/contextual-chat/test/integration"
+      method: "POST"
+      interval: 600  # 10 minutes
+      timeout: 30    # seconds
+      expected_status: 200
+      
+    - name: "End-to-End Test"
+      type: "browser"
+      script: "tests/synthetic/e2e_contextual_chat.js"
+      interval: 1800  # 30 minutes
+      timeout: 120   # seconds
+
+# Capacity monitoring
+capacity_monitoring:
+  enabled: true
+  
+  # Resource thresholds
+  thresholds:
+    cpu_usage_warning: 70    # %
+    cpu_usage_critical: 90   # %
+    memory_usage_warning: 80 # %
+    memory_usage_critical: 95 # %
+    disk_usage_warning: 80   # %
+    disk_usage_critical: 90  # %
+    
+  # Capacity planning
+  planning:
+    # Forecast resource needs
+    forecast_enabled: true
+    forecast_horizon_days: 30
+    
+    # Growth rate thresholds
+    growth_rate_warning: 0.2   # 20% growth per week
+    growth_rate_critical: 0.5  # 50% growth per week
+    
+# Environment-specific overrides
+environments:
+  development:
+    monitoring:
+      metrics:
+        collection_interval: 60
+        retention_days: 7
+    alerting:
+      enabled: false
+      
+  staging:
+    monitoring:
+      metrics:
+        collection_interval: 30
+        retention_days: 14
+    alerting:
+      enabled: true
+      channels:
+        email:
+          enabled: true
+        slack:
+          enabled: false
+          
+  production:
+    monitoring:
+      metrics:
+        collection_interval: 15
+        retention_days: 90
+    alerting:
+      enabled: true
+      channels:
+        email:
+          enabled: true
+        slack:
+          enabled: true
+        pagerduty:
+          enabled: true

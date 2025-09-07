@@ -1,0 +1,26 @@
+# OpenSearch Dashboards Assistant Plugin Configuration Example
+# Add these settings to your opensearch_dashboards.yml file
+
+# Enable the assistant plugin
+assistant.chat.enabled: true
+assistant.incontextInsight.enabled: true
+
+# OpenSearch AI Agent Integration Configuration
+assistant.aiAgent.enabled: true
+assistant.aiAgent.baseUrl: "http://localhost:8000"
+assistant.aiAgent.timeout: 300000  # 5 minutes in milliseconds
+assistant.aiAgent.healthCheckInterval: 60000  # 1 minute in milliseconds
+
+# Alternative configurations for different environments:
+
+# Development environment (AI Agent running locally)
+# assistant.aiAgent.baseUrl: "http://localhost:8000"
+
+# Production environment (AI Agent running on dedicated server)
+# assistant.aiAgent.baseUrl: "https://ai-agent.your-domain.com"
+
+# Docker environment (AI Agent running in container)
+# assistant.aiAgent.baseUrl: "http://opensearch-ai-agent:8000"
+
+# Kubernetes environment (AI Agent running as service)
+# assistant.aiAgent.baseUrl: "http://opensearch-ai-agent-service.default.svc.cluster.local:8000"

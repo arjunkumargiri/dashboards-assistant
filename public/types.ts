@@ -36,7 +36,7 @@ export interface RenderProps {
 export type MessageRenderer = (message: IMessage, renderProps: RenderProps) => React.ReactElement;
 export type ActionExecutor = (params: Record<string, unknown>) => void;
 export interface AssistantActions {
-  send: (input: IMessage) => Promise<void>;
+  send: (input: IMessage, uiContext?: any) => Promise<void>;
   loadChat: (conversationId?: string, nextToken?: string, title?: string) => Promise<void>;
   resetChat: () => void;
   openChatUI: (conversationId?: string) => void;

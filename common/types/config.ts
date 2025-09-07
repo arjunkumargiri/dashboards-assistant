@@ -31,6 +31,27 @@ export const configSchema = schema.object({
   smartAnomalyDetector: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  contextualChat: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    maxVisualizations: schema.number({ defaultValue: 20 }),
+    contextCacheTTL: schema.number({ defaultValue: 300 }),
+    extractionTimeout: schema.number({ defaultValue: 5000 }),
+    security: schema.object({
+      respectPermissions: schema.boolean({ defaultValue: true }),
+      auditAccess: schema.boolean({ defaultValue: true }),
+    }),
+    performance: schema.object({
+      debounceMs: schema.number({ defaultValue: 500 }),
+      maxContentElements: schema.number({ defaultValue: 50 }),
+      enableLazyLoading: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+  aiAgent: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    baseUrl: schema.string({ defaultValue: 'http://localhost:8000' }),
+    timeout: schema.number({ defaultValue: 300000 }), // 5 minutes
+    healthCheckInterval: schema.number({ defaultValue: 60000 }), // 1 minute
+  }),
   branding: schema.object({
     label: schema.maybe(schema.string()),
     logo: schema.maybe(

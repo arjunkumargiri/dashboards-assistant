@@ -72,19 +72,67 @@ export const useChatActions = (): AssistantActions => {
     }
   };
 
-  const send = async (input: IMessage): Promise<void> => {
+  const send = async (input: IMessage, uiContext?: any): Promise<void> => {
+    // Validate input before processing
+    if (!input || !input.content || input.content.trim() === '') {
+      console.error('❌ CRITICAL: Invalid input message in send function:', {
+        hasInput: !!input,
+        inputType: typeof input,
+        hasContent: !!input?.content,
+        contentLength: input?.content?.length || 0,
+        content: input?.content
+      });
+      throw new Error('Input message content is required and cannot be empty');
+    }
+
+    console.log('📨 useChatActions.send called with:', {
+      inputType: input.type,
+      contentLength: input.content.length,
+      contentPreview: input.content.substring(0, 50) + (input.content.length > 50 ? '...' : ''),
+      hasImages: !!input.images?.length,
+      imageCount: input.images?.length || 0,
+      hasUIContext: !!uiContext
+    });
+
     const abortController = new AbortController();
     abortControllerRef = abortController;
     chatStateDispatch({ type: 'send', payload: input });
 
     try {
+      const requestBody: any = {
+        conversationId: chatContext.conversationId,
+        ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
+        input,
+      };
+
+      // Debug UI context before sending
+      console.log('🚀 useChatActions - About to send request:', {
+        hasUIContext: !!uiContext,
+        uiContextType: typeof uiContext,
+        uiContextKeys: uiContext ? Object.keys(uiContext) : [],
+        contentCount: uiContext?.content?.length || 0
+      });
+
+      // Include UI context if provided
+      if (uiContext) {
+        requestBody.uiContext = uiContext;
+        console.log('✅ Including UI context in request:', {
+          contextElementCount: uiContext.content?.length || 0,
+          // hasTimeRange removed - no longer used
+          hasFilters: !!uiContext.filters?.length,
+          pageApp: uiContext.page?.app,
+          extractedAt: uiContext.extractedAt
+        });
+      } else {
+        console.log('❌ No UI context to include in request');
+        // Don't include uiContext key at all if it's falsy
+      }
+      
+      console.log('📤 Final request body keys:', Object.keys(requestBody));
+
       const fetchResponse = await core.services.http.post(ASSISTANT_API.SEND_MESSAGE, {
         // do not send abort signal to http client to allow LLM call run in background
-        body: JSON.stringify({
-          conversationId: chatContext.conversationId,
-          ...(!chatContext.conversationId && { messages: chatState.messages }), // include all previous messages for new chats
-          input,
-        }),
+        body: JSON.stringify(requestBody),
         query: core.services.dataSource.getDataSourceQuery(),
         asResponse: true,
       });

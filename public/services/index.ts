@@ -17,6 +17,11 @@ import chatIcon from '../assets/chat.svg';
 export * from './incontext_insight';
 export { ConversationLoadService } from './conversation_load_service';
 export { ConversationsService } from './conversations_service';
+export { 
+  FrontendContextualChatServiceRegistry,
+  getFrontendContextualChatServiceRegistry,
+  resetFrontendContextualChatServiceRegistry
+} from './contextual_chat_service_registry';
 
 export const [getIncontextInsightRegistry, setIncontextInsightRegistry] = createGetterSetter<
   IncontextInsightRegistry
@@ -49,6 +54,8 @@ export const [getAssistantService, setAssistantService] = createGetterSetter<Ass
 export const [getLocalStorage, setLocalStorage] = createGetterSetter<DataStorage>('LocalStorage');
 
 export { DataSourceService, DataSourceServiceContract } from './data_source_service';
+
+// UI Context Services removed - using snapshot-based approach only
 
 export const getLogoIcon = (type: 'gray' | 'gradient' | 'white', defaultIcon = chatIcon) => {
   return getConfigSchema()?.branding?.logo?.[type] ?? defaultIcon;

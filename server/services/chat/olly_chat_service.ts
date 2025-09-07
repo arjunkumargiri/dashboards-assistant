@@ -4,11 +4,12 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch';
-import { OpenSearchClient } from '../../../../../src/core/server';
+import { OpenSearchClient, RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API, ROOT_AGENT_CONFIG_ID } from '../../utils/constants';
 import { getAgentIdByConfigName } from '../../routes/get_agent';
+import { Readable } from 'stream';
 
 interface AgentRunPayload {
   question?: string;
@@ -88,11 +89,14 @@ export class OllyChatService implements ChatService {
     }
   }
 
-  async requestLLM(payload: {
-    messages: IMessage[];
-    input: IInput;
-    conversationId?: string;
-  }): Promise<{
+  async requestLLM(
+    payload: {
+      messages: IMessage[];
+      input: IInput;
+      conversationId?: string;
+    },
+    context: RequestHandlerContext
+  ): Promise<{
     messages: IMessage[];
     conversationId: string;
     interactionId: string;
@@ -122,10 +126,14 @@ export class OllyChatService implements ChatService {
     return await this.requestAgentRun(parametersPayload);
   }
 
-  async regenerate(payload: {
-    conversationId: string;
-    interactionId: string;
-  }): Promise<{ messages: IMessage[]; conversationId: string; interactionId: string }> {
+  async regenerate(
+    payload: {
+      conversationId: string;
+      interactionId: string;
+      rootAgentId: string;
+    },
+    context: RequestHandlerContext
+  ): Promise<{ messages: IMessage[]; conversationId: string; interactionId: string }> {
     const { conversationId, interactionId } = payload;
     const parametersPayload: Pick<
       AgentRunPayload,

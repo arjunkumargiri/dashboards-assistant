@@ -61,7 +61,7 @@ describe('<ChatInputControls />', () => {
       context: {
         appId: 'mocked_app_id',
       },
-    });
+    }, undefined); // UI context is undefined in test environment
   });
 
   it('should send message when pressing `Enter`', () => {
@@ -81,7 +81,7 @@ describe('<ChatInputControls />', () => {
       context: {
         appId: 'mocked_app_id',
       },
-    });
+    }, undefined); // UI context is undefined in test environment
   });
 
   it('should NOT send message when pressing `shift+Enter`', () => {

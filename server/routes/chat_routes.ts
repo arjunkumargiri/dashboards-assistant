@@ -14,7 +14,9 @@ import {
 } from '../../../../src/core/server';
 import { ASSISTANT_API, DEFAULT_USER_NAME } from '../../common/constants/llm';
 import { OllyChatService } from '../services/chat/olly_chat_service';
+import { ChatServiceFactory } from '../services/chat/chat_service_factory';
 import { AgentFrameworkStorageService } from '../services/storage/agent_framework_storage_service';
+import { StorageServiceFactory } from '../services/storage/storage_service_factory';
 import { RoutesOptions } from '../types';
 import { ChatService } from '../services/chat/chat_service';
 import { getOpenSearchClientTransport } from '../utils/get_opensearch_client_transport';
@@ -36,7 +38,40 @@ const llmRequestRoute = {
         content: schema.string(),
         contentType: schema.literal('text'),
         promptPrefix: schema.maybe(schema.string()),
+        images: schema.maybe(schema.arrayOf(schema.object({
+          data: schema.string(), // base64 encoded image data
+          mimeType: schema.string(), // image/png, image/jpeg, etc.
+          filename: schema.maybe(schema.string()),
+        }))),
       }),
+      // Add UI context for contextual chat
+      uiContext: schema.maybe(schema.object({
+        page: schema.object({
+          url: schema.string(),
+          title: schema.string(),
+          app: schema.string(),
+          route: schema.string(),
+          breadcrumbs: schema.arrayOf(schema.any()),
+          metadata: schema.any(),
+        }),
+        content: schema.arrayOf(schema.any()),
+        navigation: schema.object({
+          currentApp: schema.string(),
+          currentRoute: schema.string(),
+          breadcrumbs: schema.arrayOf(schema.any()),
+          availableApps: schema.arrayOf(schema.any()),
+        }),
+        filters: schema.arrayOf(schema.any()),
+        userActions: schema.arrayOf(schema.any()),
+        permissions: schema.object({
+          canViewData: schema.boolean(),
+          canModifyDashboard: schema.boolean(),
+          canAccessApp: schema.boolean(),
+          restrictedFields: schema.arrayOf(schema.string()),
+          dataSourcePermissions: schema.any(),
+        }),
+        extractedAt: schema.string(),
+      })),
     }),
     query: schema.object({
       dataSourceId: schema.maybe(schema.string()),
@@ -164,21 +199,52 @@ const accountRoute = {
 
 export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions) {
   const createStorageService = async (context: RequestHandlerContext, dataSourceId?: string) =>
-    new AgentFrameworkStorageService(
+    StorageServiceFactory.create(
+      routeOptions.config,
       await getOpenSearchClientTransport({ context, dataSourceId }),
-      routeOptions.messageParsers
+      routeOptions.messageParsers,
+      context.assistant_plugin.logger
     );
   const createChatService = async (context: RequestHandlerContext, dataSourceId?: string) =>
-    new OllyChatService(await getOpenSearchClientTransport({ context, dataSourceId }));
+    ChatServiceFactory.create(
+      routeOptions.config,
+      await getOpenSearchClientTransport({ context, dataSourceId }),
+      context.assistant_plugin.logger
+    );
 
   router.post(
     llmRequestRoute,
     async (
-      context,
+      context: RequestHandlerContext,
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
       const { messages = [], input, conversationId: conversationIdInRequestBody } = request.body;
+
+      // Comprehensive context verification at route level
+      console.log('🔍 ROUTE LEVEL - Context Analysis:', {
+        contextExists: !!context,
+        contextType: typeof context,
+        contextConstructor: context?.constructor?.name,
+        contextKeys: context ? Object.keys(context) : [],
+        assistantPluginExists: !!context?.assistant_plugin,
+        assistantPluginType: typeof context?.assistant_plugin,
+        assistantPluginKeys: context?.assistant_plugin ? Object.keys(context.assistant_plugin) : [],
+        loggerExists: !!context?.assistant_plugin?.logger,
+        loggerType: typeof context?.assistant_plugin?.logger
+      });
+
+      if (!context) {
+        console.error('❌ CRITICAL: No context provided to chat route');
+        return response.custom({ statusCode: 500, body: 'Internal server error: No request context' });
+      }
+
+      if (!context.assistant_plugin) {
+        console.error('❌ CRITICAL: Context missing assistant_plugin at route level');
+        console.error('Available context keys:', Object.keys(context));
+        return response.custom({ statusCode: 500, body: 'Internal server error: Missing plugin context' });
+      }
+
       const storageService = await createStorageService(context, request.query.dataSourceId);
       const chatService = await createChatService(context, request.query.dataSourceId);
 
@@ -188,11 +254,37 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.requestLLM({
-          messages,
-          input,
-          conversationId: conversationIdInRequestBody,
-        });
+        // Check if this is a contextual chat service
+        if (typeof (chatService as any).requestLLMWithContext === 'function') {
+          // Extract UI context from request body if available
+          const uiContext = (request.body as any).uiContext;
+
+          context.assistant_plugin.logger.debug('Using contextual chat service', {
+            hasUIContext: !!uiContext,
+            contextElementCount: uiContext?.content?.length || 0,
+            hasImages: !!input.images?.length,
+            imageCount: input.images?.length || 0
+          });
+
+          outputs = await (chatService as any).requestLLMWithContext({
+            messages,
+            input,
+            conversationId: conversationIdInRequestBody,
+            uiContext
+          }, context);
+        } else {
+          // Use standard chat service
+          context.assistant_plugin.logger.debug('Using standard chat service', {
+            hasImages: !!input.images?.length,
+            imageCount: input.images?.length || 0
+          });
+
+          outputs = await chatService.requestLLM({
+            messages,
+            input,
+            conversationId: conversationIdInRequestBody,
+          }, context);
+        }
       } catch (error) {
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
@@ -214,10 +306,11 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
       }
 
       /**
-       * Retrieve latest interactions from memory
+       * Handle response based on chat service type
        */
       const conversationId = outputs?.conversationId || (conversationIdInRequestBody as string);
       const interactionId = outputs?.interactionId || '';
+
       try {
         if (!conversationId) {
           throw new Error('Not a valid conversation');
@@ -229,39 +322,61 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           conversationId,
         };
 
-        if (!conversationIdInRequestBody) {
-          /**
-           * If no conversationId is provided in request payload,
-           * it means it is a brand new conversation,
-           * need to fetch all the details including title.
-           */
-          const conversation = await storageService.getConversation(conversationId);
-          resultPayload.interactions = conversation.interactions;
-          resultPayload.messages = conversation.messages;
-          resultPayload.title = conversation.title;
-        } else {
-          /**
-           * Only response with the latest interaction.
-           * It may have some issues in Concurrent case like a user may use two tabs to chat with Chatbot in one conversation.
-           * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
-           */
-          const interaction = await storageService.getInteraction(conversationId, interactionId);
-          resultPayload.interactions = [interaction].filter((item) => item);
-          resultPayload.messages = resultPayload.interactions.length
-            ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
-            : [];
-        }
+        // Check if we're using OpenSearch Agents service
+        if (routeOptions.config.aiAgent.enabled) {
+          // For OpenSearch Agents, return the messages directly from the chat service
+          resultPayload.messages = outputs.messages || [];
+          resultPayload.title = conversationIdInRequestBody ? undefined : 'New Conversation';
 
-        resultPayload.messages
-          .filter((message) => message.type === 'input')
-          .forEach((msg) => {
-            // hide additional conetxt to how was it generated
-            const index = msg.content.indexOf('answer question:');
-            const len = 'answer question:'.length;
-            if (index !== -1) {
-              msg.content = msg.content.substring(index + len);
+          // Create a mock interaction for compatibility
+          if (resultPayload.messages.length > 0) {
+            const lastMessage = resultPayload.messages[resultPayload.messages.length - 1];
+            if (lastMessage.type === 'output') {
+              resultPayload.interactions = [{
+                input: input.content,
+                response: lastMessage.content,
+                conversation_id: conversationId,
+                interaction_id: interactionId,
+                create_time: new Date().toISOString(),
+              }];
             }
-          });
+          }
+        } else {
+          // For ML Commons service, use the existing storage-based approach
+          if (!conversationIdInRequestBody) {
+            /**
+             * If no conversationId is provided in request payload,
+             * it means it is a brand new conversation,
+             * need to fetch all the details including title.
+             */
+            const conversation = await storageService.getConversation(conversationId);
+            resultPayload.interactions = conversation.interactions;
+            resultPayload.messages = conversation.messages;
+            resultPayload.title = conversation.title;
+          } else {
+            /**
+             * Only response with the latest interaction.
+             * It may have some issues in Concurrent case like a user may use two tabs to chat with Chatbot in one conversation.
+             * But for now we will ignore this case, can be optimized by always fetching conversation if we need to take this case into consideration.
+             */
+            const interaction = await storageService.getInteraction(conversationId, interactionId);
+            resultPayload.interactions = [interaction].filter((item) => item);
+            resultPayload.messages = resultPayload.interactions.length
+              ? await storageService.getMessagesFromInteractions(resultPayload.interactions)
+              : [];
+          }
+
+          resultPayload.messages
+            .filter((message) => message.type === 'input')
+            .forEach((msg) => {
+              // hide additional conetxt to how was it generated
+              const index = msg.content.indexOf('answer question:');
+              const len = 'answer question:'.length;
+              if (index !== -1) {
+                msg.content = msg.content.substring(index + len);
+              }
+            });
+        }
 
         return response.ok({
           body: resultPayload,
@@ -399,7 +514,7 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
   router.put(
     regenerateRoute,
     async (
-      context,
+      context: RequestHandlerContext,
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<HttpResponsePayload | ResponseError>> => {
@@ -413,7 +528,25 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
        * Get final answer from Agent framework
        */
       try {
-        outputs = await chatService.regenerate({ conversationId, interactionId });
+        // Check if this is a contextual chat service
+        if (typeof (chatService as any).regenerateWithContext === 'function') {
+          // Extract UI context from request body if available
+          const uiContext = (request.body as any).uiContext;
+
+          outputs = await (chatService as any).regenerateWithContext({
+            conversationId,
+            interactionId,
+            rootAgentId: '', // This might need to be extracted from the conversation
+            uiContext
+          }, context);
+        } else {
+          // Use standard chat service
+          outputs = await chatService.regenerate({
+            conversationId,
+            interactionId,
+            rootAgentId: '' // This might need to be extracted from the conversation
+          }, context);
+        }
       } catch (error) {
         context.assistant_plugin.logger.error(error);
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });

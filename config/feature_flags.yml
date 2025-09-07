@@ -1,0 +1,205 @@
+# Feature Flag Configuration for Contextual Dashboard Chat
+# This configuration enables gradual rollout and A/B testing capabilities
+
+contextual_chat:
+  # Global feature flag
+  enabled: false
+  
+  # Rollout configuration
+  rollout:
+    # Rollout strategy: "percentage", "user_list", "group_based", "environment"
+    strategy: "percentage"
+    
+    # Percentage of users to enable (0-100)
+    percentage: 0
+    
+    # Gradual rollout settings
+    gradual_rollout:
+      enabled: true
+      initial_percentage: 5
+      increment_percentage: 10
+      increment_interval_hours: 24
+      max_percentage: 100
+      
+      # Automatic rollback conditions
+      rollback_conditions:
+        error_rate_threshold: 0.05  # 5% error rate
+        performance_degradation_threshold: 0.2  # 20% slower
+        user_complaint_threshold: 10  # 10 complaints
+        
+    # Specific user targeting
+    user_targeting:
+      # Specific users to enable (by username or email)
+      enabled_users: []
+      
+      # Specific users to exclude (overrides other settings)
+      excluded_users: []
+      
+      # User groups to enable
+      enabled_groups:
+        - "beta_testers"
+        - "power_users"
+      
+      # User groups to exclude
+      excluded_groups:
+        - "external_users"
+        
+    # Environment-based rollout
+    environment_rollout:
+      development:
+        enabled: true
+        percentage: 100
+        force_enable: true
+        
+      staging:
+        enabled: true
+        percentage: 50
+        
+      production:
+        enabled: false
+        percentage: 0
+        
+  # Feature sub-components (can be controlled independently)
+  components:
+    # Core context extraction
+    context_extraction:
+      enabled: true
+      rollout_percentage: 100
+      
+    # Real-time DOM observation
+    dom_observation:
+      enabled: true
+      rollout_percentage: 100
+      
+    # Context-aware chat responses
+    contextual_responses:
+      enabled: false
+      rollout_percentage: 0
+      
+    # Advanced features
+    advanced_features:
+      # Context highlighting in UI
+      context_highlighting:
+        enabled: false
+        rollout_percentage: 0
+        
+      # Context history and navigation
+      context_history:
+        enabled: false
+        rollout_percentage: 0
+        
+      # Automatic context suggestions
+      context_suggestions:
+        enabled: false
+        rollout_percentage: 0
+        
+  # A/B Testing configuration
+  ab_testing:
+    enabled: false
+    
+    # Test variants
+    variants:
+      control:
+        name: "Standard Chat"
+        percentage: 50
+        features:
+          contextual_responses: false
+          
+      treatment:
+        name: "Contextual Chat"
+        percentage: 50
+        features:
+          contextual_responses: true
+          
+    # Success metrics to track
+    success_metrics:
+      - "user_engagement_rate"
+      - "chat_completion_rate"
+      - "user_satisfaction_score"
+      - "task_completion_time"
+      
+  # Monitoring and alerting
+  monitoring:
+    # Enable feature flag monitoring
+    enabled: true
+    
+    # Metrics to collect
+    metrics:
+      - "feature_usage_rate"
+      - "error_rate_by_feature"
+      - "performance_impact"
+      - "user_feedback_score"
+      
+    # Alert conditions
+    alerts:
+      high_error_rate:
+        threshold: 0.05
+        action: "rollback"
+        
+      performance_degradation:
+        threshold: 0.2
+        action: "alert_only"
+        
+      low_adoption_rate:
+        threshold: 0.1
+        action: "investigate"
+        
+  # Rollback configuration
+  rollback:
+    # Enable automatic rollback
+    automatic_rollback: true
+    
+    # Rollback triggers
+    triggers:
+      error_rate_threshold: 0.1
+      performance_threshold: 0.3
+      user_complaint_threshold: 20
+      
+    # Rollback strategy
+    strategy: "immediate"  # or "gradual"
+    
+    # Notification settings
+    notifications:
+      enabled: true
+      channels:
+        - "email"
+        - "slack"
+        - "pagerduty"
+        
+# Environment-specific overrides
+environments:
+  development:
+    contextual_chat:
+      enabled: true
+      rollout:
+        percentage: 100
+      components:
+        context_extraction:
+          enabled: true
+        contextual_responses:
+          enabled: true
+        advanced_features:
+          context_highlighting:
+            enabled: true
+          context_history:
+            enabled: true
+            
+  staging:
+    contextual_chat:
+      enabled: true
+      rollout:
+        strategy: "percentage"
+        percentage: 25
+      ab_testing:
+        enabled: true
+        
+  production:
+    contextual_chat:
+      enabled: false
+      rollout:
+        strategy: "gradual_rollout"
+        percentage: 0
+      monitoring:
+        enabled: true
+      rollback:
+        automatic_rollback: true
