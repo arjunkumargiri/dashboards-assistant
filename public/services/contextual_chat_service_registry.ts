@@ -3,13 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-  ISpecializedExtractor
-} from '../../common/types/contextual_chat_service';
+import { ISpecializedExtractor } from '../../common/types/contextual_chat_service';
 
 /**
  * Frontend Service Registry for Contextual Chat System
- * 
+ *
  * This class manages frontend services for the contextual chat feature.
  * Note: UI context services have been removed in favor of snapshot-based approach.
  */
@@ -36,7 +34,7 @@ export class FrontendContextualChatServiceRegistry {
    */
   public getExtractorsByType(contentType: string): ISpecializedExtractor[] {
     return this.getContentExtractors().filter(
-      extractor => extractor.getContentType() === contentType
+      (extractor) => extractor.getContentType() === contentType
     );
   }
 
@@ -54,7 +52,7 @@ export class FrontendContextualChatServiceRegistry {
     extractorCount: number;
   } {
     return {
-      extractorCount: this.contentExtractors.size
+      extractorCount: this.contentExtractors.size,
     };
   }
 

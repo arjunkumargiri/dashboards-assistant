@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as uuid from 'uuid';
+import { Readable } from 'stream';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ConfigSchema } from '../../../common/types/config';
-import * as uuid from 'uuid';
-import { Readable } from 'stream';
 
 interface OpenSearchAgentsChatRequest {
   query: string;
@@ -38,10 +38,7 @@ interface OpenSearchAgentsChatResponse {
 export class OpenSearchAgentsChatService implements ChatService {
   private static abortControllers: Map<string, AbortController> = new Map();
 
-  constructor(
-    private readonly config: ConfigSchema['aiAgent'],
-    private readonly logger: any
-  ) { }
+  constructor(private readonly config: ConfigSchema['aiAgent'], private readonly logger: any) {}
 
   /**
    * Get OpenSearch client from context for potential future use
@@ -50,8 +47,6 @@ export class OpenSearchAgentsChatService implements ChatService {
   private getOpenSearchClient(context: RequestHandlerContext) {
     return context.core?.opensearch?.client?.asCurrentUser;
   }
-
-
 
   private async makeStreamingRequest(
     endpoint: string,
@@ -72,7 +67,7 @@ export class OpenSearchAgentsChatService implements ChatService {
     try {
       // Prepare headers for streaming
       const headers: Record<string, string> = {
-        'Accept': 'text/event-stream',
+        Accept: 'text/event-stream',
         'Cache-Control': 'no-cache',
       };
 
@@ -93,11 +88,14 @@ export class OpenSearchAgentsChatService implements ChatService {
       headers['Content-Type'] = 'application/json';
 
       if (logger) {
-        logger.debug('Using JSON format for streaming request (works better than multipart for streaming):', {
-          hasImages: !!(payload.images && payload.images.length > 0),
-          imageCount: payload.images?.length || 0,
-          payloadSize: body.length
-        });
+        logger.debug(
+          'Using JSON format for streaming request (works better than multipart for streaming):',
+          {
+            hasImages: !!(payload.images && payload.images.length > 0),
+            imageCount: payload.images?.length || 0,
+            payloadSize: body.length,
+          }
+        );
       }
 
       // Log the request details for debugging
@@ -108,11 +106,11 @@ export class OpenSearchAgentsChatService implements ChatService {
           headers,
           hasImages: !!(payload.images && payload.images.length > 0),
           imageCount: payload.images?.length || 0,
-          queryLength: payload.query?.length || 0
+          queryLength: payload.query?.length || 0,
         });
       }
 
-      logger.warn("Made streaming request");
+      logger.warn('Made streaming request');
       const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
         method: 'POST',
         headers,
@@ -128,10 +126,12 @@ export class OpenSearchAgentsChatService implements ChatService {
           logger.error('OpenSearch Agents streaming API error response:', {
             status: response.status,
             statusText: response.statusText,
-            errorBody: errorText
+            errorBody: errorText,
           });
         }
-        throw new Error(`OpenSearch Agents streaming API error: ${response.status} ${response.statusText} - ${errorText}`);
+        throw new Error(
+          `OpenSearch Agents streaming API error: ${response.status} ${response.statusText} - ${errorText}`
+        );
       }
 
       if (!response.body) {
@@ -140,14 +140,13 @@ export class OpenSearchAgentsChatService implements ChatService {
 
       // Create a readable stream that processes Server-Sent Events
       const readable = new Readable({
-        read() { }
+        read() {},
       });
 
       // Process the streaming response
       this.processStreamingResponse(response.body, readable, conversationId, logger);
 
       return readable;
-
     } catch (error) {
       clearTimeout(timeoutId);
       if (logger) {
@@ -189,21 +188,25 @@ export class OpenSearchAgentsChatService implements ChatService {
               // Process different event types
               switch (eventData.type) {
                 case 'start':
-                  readable.push(`data: ${JSON.stringify({
-                    type: 'start',
-                    conversationId: eventData.session_id || conversationId,
-                    timestamp: new Date().toISOString()
-                  })}\n\n`);
+                  readable.push(
+                    `data: ${JSON.stringify({
+                      type: 'start',
+                      conversationId: eventData.session_id || conversationId,
+                      timestamp: new Date().toISOString(),
+                    })}\n\n`
+                  );
                   break;
 
                 case 'content':
                   accumulatedContent += eventData.content || '';
-                  readable.push(`data: ${JSON.stringify({
-                    type: 'content',
-                    content: eventData.content || '',
-                    accumulatedContent,
-                    conversationId: eventData.session_id || conversationId
-                  })}\n\n`);
+                  readable.push(
+                    `data: ${JSON.stringify({
+                      type: 'content',
+                      content: eventData.content || '',
+                      accumulatedContent,
+                      conversationId: eventData.session_id || conversationId,
+                    })}\n\n`
+                  );
                   break;
 
                 case 'complete':
@@ -221,32 +224,37 @@ export class OpenSearchAgentsChatService implements ChatService {
                     interactionId: `${eventData.session_id || conversationId}-${Date.now()}`,
                     traceId: `${eventData.session_id || conversationId}-${Date.now()}`,
                     createTime: new Date().toISOString(),
-                    ...(eventData.sources && eventData.sources.length > 0 && {
-                      sourceAttributions: eventData.sources.map((source: any) => ({
-                        title: `Document ${source.document_id}`,
-                        url: `#/discover?_a=(index:'${source.index}')`,
-                        body: `Score: ${source.score}, Timestamp: ${source.timestamp}`
-                      }))
-                    })
+                    ...(eventData.sources &&
+                      eventData.sources.length > 0 && {
+                        sourceAttributions: eventData.sources.map((source: any) => ({
+                          title: `Document ${source.document_id}`,
+                          url: `#/discover?_a=(index:'${source.index}')`,
+                          body: `Score: ${source.score}, Timestamp: ${source.timestamp}`,
+                        })),
+                      }),
                   };
 
-                  readable.push(`data: ${JSON.stringify({
-                    type: 'complete',
-                    messages: [inputMessage, responseMessage],
-                    conversationId: eventData.session_id || conversationId,
-                    interactionId: `${eventData.session_id || conversationId}-${Date.now()}`,
-                    accumulatedContent
-                  })}\n\n`);
+                  readable.push(
+                    `data: ${JSON.stringify({
+                      type: 'complete',
+                      messages: [inputMessage, responseMessage],
+                      conversationId: eventData.session_id || conversationId,
+                      interactionId: `${eventData.session_id || conversationId}-${Date.now()}`,
+                      accumulatedContent,
+                    })}\n\n`
+                  );
 
                   readable.push(null); // End the stream
                   return;
 
                 case 'error':
-                  readable.push(`data: ${JSON.stringify({
-                    type: 'error',
-                    error: eventData.error || 'Unknown streaming error',
-                    conversationId: eventData.session_id || conversationId
-                  })}\n\n`);
+                  readable.push(
+                    `data: ${JSON.stringify({
+                      type: 'error',
+                      error: eventData.error || 'Unknown streaming error',
+                      conversationId: eventData.session_id || conversationId,
+                    })}\n\n`
+                  );
 
                   readable.push(null); // End the stream
                   return;
@@ -267,11 +275,13 @@ export class OpenSearchAgentsChatService implements ChatService {
       if (logger) {
         logger.error('Error processing streaming response:', error);
       }
-      readable.push(`data: ${JSON.stringify({
-        type: 'error',
-        error: error.message,
-        conversationId
-      })}\n\n`);
+      readable.push(
+        `data: ${JSON.stringify({
+          type: 'error',
+          error: error.message,
+          conversationId,
+        })}\n\n`
+      );
     } finally {
       readable.push(null); // Ensure stream ends
       reader.releaseLock();
@@ -317,7 +327,7 @@ export class OpenSearchAgentsChatService implements ChatService {
         headers,
         payloadKeys: Object.keys(payload),
         payloadQuery: payload.query,
-        payloadSize: JSON.stringify(payload).length
+        payloadSize: JSON.stringify(payload).length,
       });
 
       const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
@@ -334,9 +344,11 @@ export class OpenSearchAgentsChatService implements ChatService {
         this.logger.error('OpenSearch Agents API error response:', {
           status: response.status,
           statusText: response.statusText,
-          errorBody: errorText
+          errorBody: errorText,
         });
-        throw new Error(`OpenSearch Agents API error: ${response.status} ${response.statusText} - ${errorText}`);
+        throw new Error(
+          `OpenSearch Agents API error: ${response.status} ${response.statusText} - ${errorText}`
+        );
       }
 
       return await response.json();
@@ -350,8 +362,6 @@ export class OpenSearchAgentsChatService implements ChatService {
       }
     }
   }
-
-
 
   async requestLLM(
     payload: { messages: IMessage[]; input: IInput; conversationId?: string },
@@ -371,7 +381,9 @@ export class OpenSearchAgentsChatService implements ChatService {
       hasAssistantPlugin: !!context?.assistant_plugin,
       hasLogger: !!context?.assistant_plugin?.logger,
       contextKeys: context ? Object.keys(context) : 'no context',
-      assistantPluginKeys: context?.assistant_plugin ? Object.keys(context.assistant_plugin) : 'no assistant_plugin'
+      assistantPluginKeys: context?.assistant_plugin
+        ? Object.keys(context.assistant_plugin)
+        : 'no assistant_plugin',
     });
 
     // Use context logger for better traceability, with defensive checks
@@ -427,13 +439,14 @@ export class OpenSearchAgentsChatService implements ChatService {
     const agentRequest: OpenSearchAgentsChatRequest = {
       query: llmInput,
       session_id: sessionId,
-      ...(input.images && input.images.length > 0 && {
-        images: input.images.map(img => ({
-          data: img.data,
-          mime_type: img.mimeType,
-          filename: img.filename
-        }))
-      }),
+      ...(input.images &&
+        input.images.length > 0 && {
+          images: input.images.map((img) => ({
+            data: img.data,
+            mime_type: img.mimeType,
+            filename: img.filename,
+          })),
+        }),
     };
 
     // Debug log the request structure
@@ -442,13 +455,19 @@ export class OpenSearchAgentsChatService implements ChatService {
       queryLength: agentRequest.query?.length || 0,
       hasSessionId: !!agentRequest.session_id,
       hasImages: !!agentRequest.images?.length,
-      imageCount: agentRequest.images?.length || 0
+      imageCount: agentRequest.images?.length || 0,
     });
 
     // Try streaming first - return stream directly to UI for real-time streaming
     try {
       logger.info('Attempting streaming response for OpenSearch Agents');
-      const stream = await this.makeStreamingRequest('/api/v1/chat/stream', agentRequest, conversationId, context, logger);
+      const stream = await this.makeStreamingRequest(
+        '/api/v1/chat/stream',
+        agentRequest,
+        conversationId,
+        context,
+        logger
+      );
 
       if (stream) {
         logger.info('Successfully created streaming response - returning stream to UI');
@@ -456,7 +475,7 @@ export class OpenSearchAgentsChatService implements ChatService {
           messages: [], // Empty messages for streaming mode
           conversationId: sessionId,
           interactionId: `${sessionId}-${Date.now()}`,
-          stream // Return the stream directly to the UI
+          stream, // Return the stream directly to the UI
         };
       }
     } catch (streamError) {
@@ -466,14 +485,19 @@ export class OpenSearchAgentsChatService implements ChatService {
     // Fallback to regular (non-streaming) request
     try {
       logger.info('Using regular (non-streaming) response for OpenSearch Agents');
-      const agentResponse = await this.makeAgentRequest('/api/v1/chat', agentRequest, conversationId, context);
+      const agentResponse = await this.makeAgentRequest(
+        '/api/v1/chat',
+        agentRequest,
+        conversationId,
+        context
+      );
 
       // Create input message
       const inputMessage: IMessage = {
         type: 'input',
         contentType: 'text',
         content: input.content,
-        ...(input.context && { context: input.context })
+        ...(input.context && { context: input.context }),
       };
 
       // Format the response as a message that the UI can display
@@ -484,13 +508,14 @@ export class OpenSearchAgentsChatService implements ChatService {
         interactionId: `${agentResponse.session_id}-${Date.now()}`,
         traceId: `${agentResponse.session_id}-${Date.now()}`,
         createTime: new Date().toISOString(),
-        ...(agentResponse.sources && agentResponse.sources.length > 0 && {
-          sourceAttributions: agentResponse.sources.map(source => ({
-            title: `Document ${source.document_id}`,
-            url: `#/discover?_a=(index:'${source.index}')`,
-            body: `Score: ${source.score}, Timestamp: ${source.timestamp}`
-          }))
-        })
+        ...(agentResponse.sources &&
+          agentResponse.sources.length > 0 && {
+            sourceAttributions: agentResponse.sources.map((source) => ({
+              title: `Document ${source.document_id}`,
+              url: `#/discover?_a=(index:'${source.index}')`,
+              body: `Score: ${source.score}, Timestamp: ${source.timestamp}`,
+            })),
+          }),
       };
 
       return {
@@ -530,7 +555,9 @@ export class OpenSearchAgentsChatService implements ChatService {
     let sessionId = conversationId;
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!sessionId || !uuidRegex.test(sessionId)) {
-      logger.warn('Invalid session ID for regeneration, generating new UUID:', { oldSessionId: sessionId });
+      logger.warn('Invalid session ID for regeneration, generating new UUID:', {
+        oldSessionId: sessionId,
+      });
       sessionId = uuid.v4();
     }
 
@@ -543,7 +570,12 @@ export class OpenSearchAgentsChatService implements ChatService {
 
     try {
       logger.info(`Regenerating response for conversation: ${conversationId}`);
-      const agentResponse = await this.makeAgentRequest('/api/v1/chat', agentRequest, conversationId, context);
+      const agentResponse = await this.makeAgentRequest(
+        '/api/v1/chat',
+        agentRequest,
+        conversationId,
+        context
+      );
 
       // Format the regenerated response as a message
       const responseMessage: IMessage = {
@@ -553,13 +585,14 @@ export class OpenSearchAgentsChatService implements ChatService {
         interactionId: `${agentResponse.session_id}-${Date.now()}`,
         traceId: `${agentResponse.session_id}-${Date.now()}`,
         createTime: new Date().toISOString(),
-        ...(agentResponse.sources && agentResponse.sources.length > 0 && {
-          sourceAttributions: agentResponse.sources.map(source => ({
-            title: `Document ${source.document_id}`,
-            url: `#/discover?_a=(index:'${source.index}')`,
-            body: `Score: ${source.score}, Timestamp: ${source.timestamp}`
-          }))
-        })
+        ...(agentResponse.sources &&
+          agentResponse.sources.length > 0 && {
+            sourceAttributions: agentResponse.sources.map((source) => ({
+              title: `Document ${source.document_id}`,
+              url: `#/discover?_a=(index:'${source.index}')`,
+              body: `Score: ${source.score}, Timestamp: ${source.timestamp}`,
+            })),
+          }),
       };
 
       return {

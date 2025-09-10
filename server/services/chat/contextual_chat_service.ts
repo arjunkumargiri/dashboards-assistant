@@ -12,7 +12,7 @@ import { ContextualResponseProcessor } from './contextual_response_processor';
 
 /**
  * Contextual Chat Service - Snapshot-based approach
- * 
+ *
  * This service wraps a base chat service and adds contextual capabilities
  * using snapshot-based context extraction instead of continuous monitoring.
  */
@@ -47,7 +47,7 @@ export class ContextualChatService implements ChatService {
     try {
       // Extract context from the provided context parameter (snapshot-based)
       let enhancedMessages = messages;
-      
+
       if (context && context.uiContext) {
         this.logger.debug('Enhancing messages with UI context');
         enhancedMessages = await this.promptBuilder.enhanceMessagesWithContext(
@@ -70,15 +70,14 @@ export class ContextualChatService implements ChatService {
       );
 
       return processedResponse;
-
     } catch (error) {
       this.logger.error('Error in contextual chat service:', error);
-      
+
       if (this.config.fallbackToStandard) {
         this.logger.info('Falling back to standard chat service');
         return this.baseChatService.sendMessage(messages, conversationId, context);
       }
-      
+
       throw error;
     }
   }
@@ -98,7 +97,7 @@ export class ContextualChatService implements ChatService {
     try {
       // Extract context from the provided context parameter (snapshot-based)
       let enhancedMessages = messages;
-      
+
       if (context && context.uiContext) {
         this.logger.debug('Enhancing streaming messages with UI context');
         enhancedMessages = await this.promptBuilder.enhanceMessagesWithContext(
@@ -113,15 +112,14 @@ export class ContextualChatService implements ChatService {
         conversationId,
         context
       );
-
     } catch (error) {
       this.logger.error('Error in contextual streaming chat service:', error);
-      
+
       if (this.config.fallbackToStandard) {
         this.logger.info('Falling back to standard streaming chat service');
         return this.baseChatService.processStreamingResponse(messages, conversationId, context);
       }
-      
+
       throw error;
     }
   }
@@ -132,7 +130,7 @@ export class ContextualChatService implements ChatService {
   getStatus(): { enabled: boolean; contextual: boolean } {
     return {
       enabled: true,
-      contextual: this.config.enabled
+      contextual: this.config.enabled,
     };
   }
 }

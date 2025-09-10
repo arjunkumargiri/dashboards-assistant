@@ -101,7 +101,7 @@ export class FeatureFlagManager {
       },
     ];
 
-    defaultFlags.forEach(flag => {
+    defaultFlags.forEach((flag) => {
       this.flags.set(flag.key, flag);
     });
   }
@@ -118,7 +118,7 @@ export class FeatureFlagManager {
         perPage: 100,
       });
 
-      response.saved_objects.forEach(obj => {
+      response.saved_objects.forEach((obj) => {
         const override = obj.attributes as FeatureFlagOverride;
         this.overrides.set(override.key, override);
       });
@@ -136,11 +136,10 @@ export class FeatureFlagManager {
     }
 
     try {
-      await this.savedObjectsClient.create(
-        'contextual-chat-feature-flags',
-        override,
-        { id: override.key, overwrite: true }
-      );
+      await this.savedObjectsClient.create('contextual-chat-feature-flags', override, {
+        id: override.key,
+        overwrite: true,
+      });
 
       this.overrides.set(override.key, override);
       this.logger.info(`Saved feature flag override for ${override.key}`);
@@ -212,7 +211,7 @@ export class FeatureFlagManager {
 
   public getFlagStatus(userId?: string): Record<string, boolean> {
     const status: Record<string, boolean> = {};
-    
+
     this.flags.forEach((flag, key) => {
       status[key] = this.isEnabled(key, userId);
     });
@@ -243,7 +242,7 @@ export class FeatureFlagManager {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);

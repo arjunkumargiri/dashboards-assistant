@@ -382,7 +382,7 @@ describe('ConfigValidator', () => {
       const report = validator.validateConfig(config);
 
       // Should not have error for 'enabled' field since rule was removed
-      const enabledErrors = report.errors.filter(e => e.field === 'enabled');
+      const enabledErrors = report.errors.filter((e) => e.field === 'enabled');
       expect(enabledErrors).toHaveLength(0);
     });
   });
@@ -415,7 +415,7 @@ describe('ConfigValidator', () => {
       const config = { ...validConfig, maxVisualizations: 0 };
       const report = validator.validateConfig(config);
 
-      const error = report.errors.find(e => e.field === 'maxVisualizations');
+      const error = report.errors.find((e) => e.field === 'maxVisualizations');
       expect(error?.suggestion).toBe('Recommended range: 10-30 for optimal performance');
     });
   });

@@ -66,7 +66,7 @@ export class StreamingChatService {
       dataSourceId,
       conversationId: request.conversationId,
       isCurrentlyStreaming: this.isStreaming(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Only abort if there's actually an active streaming request
@@ -83,10 +83,10 @@ export class StreamingChatService {
     try {
       // Use the HTTP service to get the correct base path
       const basePath = this.http.basePath.get();
-      const endpoint = dataSourceId 
+      const endpoint = dataSourceId
         ? `${ASSISTANT_API.SEND_MESSAGE}?dataSourceId=${dataSourceId}`
         : ASSISTANT_API.SEND_MESSAGE;
-      
+
       // Construct the full URL with base path
       const url = `${basePath}${endpoint}`;
 
@@ -96,7 +96,7 @@ export class StreamingChatService {
         contextElementCount: request.uiContext?.content?.length || 0,
         hasImages: !!request.input.images?.length,
         imageCount: request.input.images?.length || 0,
-        basePath: basePath
+        basePath,
       });
 
       console.log('🌐 STREAMING SERVICE: Making fetch request...');
@@ -105,7 +105,7 @@ export class StreamingChatService {
         headers: {
           'Content-Type': 'application/json',
           'osd-xsrf': 'true',
-          'Accept': 'text/event-stream',
+          Accept: 'text/event-stream',
           'Cache-Control': 'no-cache',
         },
         body: JSON.stringify(request),
@@ -117,14 +117,14 @@ export class StreamingChatService {
           ok: response.ok,
           status: response.status,
           statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
+          headers: Object.fromEntries(response.headers.entries()),
         });
       } catch (headerError) {
         console.error('❌ STREAMING SERVICE: Error processing headers:', headerError);
         console.log('📥 STREAMING SERVICE: Basic response info:', {
           ok: response.ok,
           status: response.status,
-          statusText: response.statusText
+          statusText: response.statusText,
         });
       }
 
@@ -134,7 +134,7 @@ export class StreamingChatService {
           console.error('❌ STREAMING SERVICE: HTTP Error:', {
             status: response.status,
             statusText: response.statusText,
-            body: errorText
+            body: errorText,
           });
           throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
         } catch (textError) {
@@ -144,7 +144,7 @@ export class StreamingChatService {
       }
 
       console.log('🔍 STREAMING SERVICE: About to check content-type...');
-      
+
       let contentType;
       try {
         contentType = response.headers.get('content-type');
@@ -153,12 +153,12 @@ export class StreamingChatService {
         console.error('❌ STREAMING SERVICE: Error getting content-type:', contentTypeError);
         contentType = null;
       }
-      
+
       console.log('🔍 STREAMING SERVICE: Content type analysis:', {
         contentType,
         includesEventStream: contentType?.includes('text/event-stream'),
         includesJson: contentType?.includes('application/json'),
-        isStreaming: contentType?.includes('text/event-stream')
+        isStreaming: contentType?.includes('text/event-stream'),
       });
 
       // Check if this is a streaming response
@@ -172,7 +172,7 @@ export class StreamingChatService {
           console.log('📄 STREAMING SERVICE: Processing regular JSON response...');
           console.log('⚠️ STREAMING SERVICE: Backend returned JSON instead of streaming!');
           console.log('📄 STREAMING SERVICE: Content-type was:', contentType);
-          
+
           try {
             // Handle regular JSON response
             const jsonResponse = await response.json();
@@ -215,7 +215,7 @@ export class StreamingChatService {
     onError: (error: Error) => void
   ): Promise<void> {
     console.log('🌊 STREAMING SERVICE: processStreamingResponse started');
-    
+
     const reader = response.body?.getReader();
     if (!reader) {
       console.error('❌ STREAMING SERVICE: Response body is not readable');
@@ -234,16 +234,20 @@ export class StreamingChatService {
       while (true) {
         console.log('📖 STREAMING SERVICE: Reading next chunk...');
         const { done, value } = await reader.read();
-        console.log('📖 STREAMING SERVICE: Read result:', { done, hasValue: !!value, valueLength: value?.length || 0 });
-        
+        console.log('📖 STREAMING SERVICE: Read result:', {
+          done,
+          hasValue: !!value,
+          valueLength: value?.length || 0,
+        });
+
         if (done) {
           console.log('✅ Stream completed');
           console.log('📊 Stream statistics:', {
             totalEvents: eventCount,
             totalCharacters: streamingContent.length,
-            finalResponseAvailable: !!finalResponse
+            finalResponseAvailable: !!finalResponse,
           });
-          
+
           // Only call onComplete if we have a final response from the server
           // Don't create a fallback message from streaming content to avoid duplicates
           if (finalResponse) {
@@ -253,7 +257,9 @@ export class StreamingChatService {
             console.log('⚠️ STREAMING SERVICE: No final response received from server');
             // Only create fallback if we actually received streaming content
             if (streamingContent.trim()) {
-              console.log('🔄 STREAMING SERVICE: Creating fallback response from streaming content');
+              console.log(
+                '🔄 STREAMING SERVICE: Creating fallback response from streaming content'
+              );
               onComplete({
                 conversationId: 'stream-conversation',
                 interactionId: 'stream-interaction',
@@ -261,10 +267,10 @@ export class StreamingChatService {
                   {
                     type: 'output',
                     content: streamingContent,
-                    contentType: 'text'
-                  }
+                    contentType: 'text',
+                  },
                 ],
-                interactions: []
+                interactions: [],
               });
             } else {
               console.log('❌ STREAMING SERVICE: No content received, not calling onComplete');
@@ -285,11 +291,11 @@ export class StreamingChatService {
           if (line.trim() === '') continue;
 
           eventCount++;
-          
+
           // Handle Server-Sent Events format
           if (line.startsWith('data: ')) {
             const data = line.slice(6); // Remove 'data: ' prefix
-            
+
             if (data === '[DONE]') {
               console.log('🏁 Received [DONE] signal');
               continue;
@@ -298,9 +304,9 @@ export class StreamingChatService {
             try {
               // Try to parse as JSON (for structured events)
               const eventData = JSON.parse(data);
-              
+
               console.log('📨 Received SSE event:', eventData.type, eventData);
-              
+
               if (eventData.type === 'content') {
                 const content = eventData.content || '';
                 streamingContent += content;
@@ -309,7 +315,8 @@ export class StreamingChatService {
                   chunkLength: content.length,
                   totalLength: streamingContent.length,
                   chunkPreview: content.substring(0, 30) + (content.length > 30 ? '...' : ''),
-                  totalPreview: streamingContent.substring(0, 50) + (streamingContent.length > 50 ? '...' : '')
+                  totalPreview:
+                    streamingContent.substring(0, 50) + (streamingContent.length > 50 ? '...' : ''),
                 });
               } else if (eventData.type === 'start') {
                 console.log('🚀 Stream started:', eventData.conversationId);
@@ -320,7 +327,7 @@ export class StreamingChatService {
                   conversationId: eventData.conversationId,
                   interactionId: eventData.interactionId,
                   messages: eventData.messages || [],
-                  interactions: []
+                  interactions: [],
                 };
               } else if (eventData.type === 'error') {
                 throw new Error(eventData.error || 'Streaming error');

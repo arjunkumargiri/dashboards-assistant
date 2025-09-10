@@ -22,14 +22,13 @@ export function initializeContextualChatPublicServices(
   }
 
   console.log('Initializing contextual chat public services...');
-  
+
   try {
     // Snapshot-based approach - no persistent services to initialize
     // Context extraction happens on-demand when chat is used
     console.log('Contextual chat using snapshot-based approach - no persistent services needed');
 
     console.log('Contextual chat public services successfully initialized');
-
   } catch (error) {
     console.error('Failed to initialize contextual chat public services:', error);
     // Don't throw error to avoid breaking the plugin
@@ -50,6 +49,6 @@ export function isContextualChatReady(): boolean {
 export function getContextualChatStatus() {
   return {
     isReady: true,
-    approach: 'snapshot-based'
+    approach: 'snapshot-based',
   };
 }

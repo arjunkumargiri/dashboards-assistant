@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
+import {
   ISpecializedExtractor,
-  IContextualChatService
+  IContextualChatService,
 } from '../../common/types/contextual_chat_service';
 
 /**
  * Service Registry for Contextual Chat System - Snapshot-based approach
- * 
+ *
  * This class implements dependency injection and service registration
  * for the contextual chat feature components.
  * Note: UI context services removed in favor of snapshot-based approach.
@@ -53,7 +53,7 @@ export class ContextualChatServiceRegistry {
    */
   public getExtractorsByType(contentType: string): ISpecializedExtractor[] {
     return this.getContentExtractors().filter(
-      extractor => extractor.getContentType() === contentType
+      (extractor) => extractor.getContentType() === contentType
     );
   }
 
@@ -61,8 +61,7 @@ export class ContextualChatServiceRegistry {
    * Check if all required services are registered
    */
   public isFullyConfigured(): boolean {
-    return this.contextualChatService !== null &&
-           this.contentExtractors.size > 0;
+    return this.contextualChatService !== null && this.contentExtractors.size > 0;
   }
 
   /**
@@ -74,7 +73,7 @@ export class ContextualChatServiceRegistry {
   } {
     return {
       contextualChatService: this.contextualChatService !== null,
-      extractorCount: this.contentExtractors.size
+      extractorCount: this.contentExtractors.size,
     };
   }
 

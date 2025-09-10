@@ -72,7 +72,7 @@ describe('PerformanceMonitoringService', () => {
 
       const hitRateHistory = performanceService.getMetricHistory('cache_hit_rate');
       expect(hitRateHistory).toHaveLength(4);
-      
+
       // Last recorded hit rate should be 3/4 = 0.75
       const lastHitRate = hitRateHistory[hitRateHistory.length - 1];
       expect(lastHitRate.value).toBe(0.75);
@@ -303,7 +303,7 @@ describe('PerformanceMonitoringService', () => {
       ];
 
       mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockAlerts.map(alert => ({ attributes: alert })),
+        saved_objects: mockAlerts.map((alert) => ({ attributes: alert })),
         total: 2,
         per_page: 50,
         page: 1,
@@ -336,10 +336,10 @@ describe('PerformanceMonitoringService', () => {
         critical: 6000,
       });
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Updated threshold for extraction_time',
-        { warning: 2000, critical: 6000 }
-      );
+      expect(mockLogger.info).toHaveBeenCalledWith('Updated threshold for extraction_time', {
+        warning: 2000,
+        critical: 6000,
+      });
     });
 
     it('should warn about unknown metrics when updating thresholds', () => {
@@ -399,11 +399,11 @@ describe('PerformanceMonitoringService', () => {
 
     it('should clean up old metrics', () => {
       // Record old metrics
-      const oldTimestamp = Date.now() - (2 * 60 * 60 * 1000); // 2 hours ago
+      const oldTimestamp = Date.now() - 2 * 60 * 60 * 1000; // 2 hours ago
       jest.spyOn(Date, 'now').mockReturnValue(oldTimestamp);
-      
+
       performanceService.recordMetric('old_metric', 100, 'count');
-      
+
       jest.restoreAllMocks();
 
       // Advance time to trigger cleanup

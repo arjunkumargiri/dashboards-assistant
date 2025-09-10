@@ -54,14 +54,17 @@ describe('<ChatInputControls />', () => {
       target: { value: 'what indices are in my cluster?' },
     });
     fireEvent.click(screen.getByRole('button'));
-    expect(sendMock).toHaveBeenCalledWith({
-      type: 'input',
-      content: 'what indices are in my cluster?',
-      contentType: 'text',
-      context: {
-        appId: 'mocked_app_id',
+    expect(sendMock).toHaveBeenCalledWith(
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+        context: {
+          appId: 'mocked_app_id',
+        },
       },
-    }, undefined); // UI context is undefined in test environment
+      undefined
+    ); // UI context is undefined in test environment
   });
 
   it('should send message when pressing `Enter`', () => {
@@ -74,14 +77,17 @@ describe('<ChatInputControls />', () => {
       keyCode: 13,
       shiftKey: false,
     });
-    expect(sendMock).toHaveBeenCalledWith({
-      type: 'input',
-      content: 'what indices are in my cluster?',
-      contentType: 'text',
-      context: {
-        appId: 'mocked_app_id',
+    expect(sendMock).toHaveBeenCalledWith(
+      {
+        type: 'input',
+        content: 'what indices are in my cluster?',
+        contentType: 'text',
+        context: {
+          appId: 'mocked_app_id',
+        },
       },
-    }, undefined); // UI context is undefined in test environment
+      undefined
+    ); // UI context is undefined in test environment
   });
 
   it('should NOT send message when pressing `shift+Enter`', () => {

@@ -101,7 +101,7 @@ describe('ContextualChatAdminService', () => {
 
     it('should include all configuration categories', async () => {
       const settings = await adminService.getAdminSettings();
-      const categories = [...new Set(settings.map(s => s.category))];
+      const categories = [...new Set(settings.map((s) => s.category))];
 
       expect(categories).toContain('features');
       expect(categories).toContain('performance');
@@ -137,8 +137,9 @@ describe('ContextualChatAdminService', () => {
     });
 
     it('should handle unknown settings', async () => {
-      await expect(adminService.updateAdminSetting('unknown', 'value'))
-        .rejects.toThrow('Unknown setting: unknown');
+      await expect(adminService.updateAdminSetting('unknown', 'value')).rejects.toThrow(
+        'Unknown setting: unknown'
+      );
     });
 
     it('should handle save errors gracefully', async () => {
@@ -249,8 +250,9 @@ describe('ContextualChatAdminService', () => {
     it('should handle save errors', async () => {
       mockFeatureFlagManager.saveOverride.mockRejectedValue(new Error('Save failed'));
 
-      await expect(adminService.updateFeatureFlag('test', true, 'reason'))
-        .rejects.toThrow('Save failed');
+      await expect(adminService.updateFeatureFlag('test', true, 'reason')).rejects.toThrow(
+        'Save failed'
+      );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to update feature flag test',

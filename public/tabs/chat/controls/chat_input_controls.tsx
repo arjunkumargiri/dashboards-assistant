@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextArea, EuiCheckbox, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextArea,
+  EuiCheckbox,
+  EuiToolTip,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import autosize from 'autosize';
 import React, { useRef, useState } from 'react';
 import { useEffectOnce } from 'react-use';
@@ -31,10 +39,18 @@ const extractUnit = (value) => {
 
 const extractTrendIndicator = (element) => {
   const trendClasses = element.className || '';
-  if (trendClasses.includes('up') || trendClasses.includes('increase') || trendClasses.includes('positive')) {
+  if (
+    trendClasses.includes('up') ||
+    trendClasses.includes('increase') ||
+    trendClasses.includes('positive')
+  ) {
     return 'up';
   }
-  if (trendClasses.includes('down') || trendClasses.includes('decrease') || trendClasses.includes('negative')) {
+  if (
+    trendClasses.includes('down') ||
+    trendClasses.includes('decrease') ||
+    trendClasses.includes('negative')
+  ) {
     return 'down';
   }
   return 'neutral';
@@ -90,21 +106,23 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       await waitForDashboardReady();
 
       // Step 2: Find dashboard elements using comprehensive selectors
-      const dashboardElements = document.querySelectorAll([
-        '[data-test-subj*="embeddable"]',
-        '[data-test-subj*="embeddablePanel"]',
-        '[data-test-subj*="visualization"]',
-        '.react-grid-item',
-        '.euiPanel',
-        '.euiStat',
-        'table',
-        '.euiTable',
-        '.euiDataGrid',
-        'canvas[data-chart]',
-        'svg[data-chart]',
-        '.lens-vis-container',
-        '.vega-vis-container'
-      ].join(', '));
+      const dashboardElements = document.querySelectorAll(
+        [
+          '[data-test-subj*="embeddable"]',
+          '[data-test-subj*="embeddablePanel"]',
+          '[data-test-subj*="visualization"]',
+          '.react-grid-item',
+          '.euiPanel',
+          '.euiStat',
+          'table',
+          '.euiTable',
+          '.euiDataGrid',
+          'canvas[data-chart]',
+          'svg[data-chart]',
+          '.lens-vis-container',
+          '.vega-vis-container',
+        ].join(', ')
+      );
 
       console.log(`📊 Found ${dashboardElements.length} dashboard elements`);
 
@@ -137,15 +155,15 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             dashboardId: extractDashboardId(),
             savedObjectType: extractSavedObjectType(),
             lastModified: new Date().toISOString(),
-            permissions: ['read', 'view']
-          }
+            permissions: ['read', 'view'],
+          },
         },
         content,
         navigation: {
           currentApp: chatContext.appId || extractAppFromURL(),
           currentRoute: window.location.pathname,
           breadcrumbs: extractBreadcrumbs(), // Add breadcrumbs here too
-          availableApps: [] // Add required availableApps array
+          availableApps: [], // Add required availableApps array
         },
         filters: await extractAdvancedFilters(),
         // timeRange removed - no longer used
@@ -155,15 +173,15 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           canModifyDashboard: false,
           canAccessApp: true,
           restrictedFields: [],
-          dataSourcePermissions: {}
+          dataSourcePermissions: {},
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       console.log('✅ Puppeteer-style context extracted:', {
         contentCount: content.length,
         pageApp: context.page.app,
-        hasFilters: context.filters.length > 0
+        hasFilters: context.filters.length > 0,
         // hasTimeRange removed - no longer used
       });
 
@@ -182,7 +200,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       '[data-test-subj="dashboardViewport"]',
       '.react-grid-layout',
       '[data-render-complete="true"]',
-      '.dashboard-container'
+      '.dashboard-container',
     ];
 
     const timeout = 5000;
@@ -200,7 +218,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         }
       }
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     console.log('⚠️ Dashboard readiness timeout, proceeding anyway');
@@ -214,23 +232,21 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       '.loading',
       '.spinner',
       '[data-loading="true"]',
-      '.euiLoadingSpinner'
+      '.euiLoadingSpinner',
     ];
 
     let attempts = 0;
     const maxAttempts = 20; // 2 seconds max
 
     while (attempts < maxAttempts) {
-      const hasLoading = loadingSelectors.some(selector =>
-        document.querySelector(selector)
-      );
+      const hasLoading = loadingSelectors.some((selector) => document.querySelector(selector));
 
       if (!hasLoading) {
         console.log('✅ Dynamic content loaded');
         return;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       attempts++;
     }
 
@@ -256,39 +272,39 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
 
         // Advanced data extraction based on type
         ...(type === 'visualization' && {
-          chartData: await extractChartDataAdvanced(element)
+          chartData: await extractChartDataAdvanced(element),
         }),
         ...(type === 'data_table' && {
-          tableData: await extractTableDataAdvanced(element)
+          tableData: await extractTableDataAdvanced(element),
         }),
         ...(type === 'metric' && {
-          metricData: await extractMetricDataAdvanced(element)
-        })
+          metricData: await extractMetricDataAdvanced(element),
+        }),
       },
       position: {
         x: rect.left,
         y: rect.top,
         width: rect.width,
         height: rect.height,
-        area: rect.width * rect.height
+        area: rect.width * rect.height,
       },
       visual: {
         hasCanvas: !!element.querySelector('canvas'),
         hasSVG: !!element.querySelector('svg'),
         hasLegend: !!element.querySelector('.legend, .euiLegend'),
-        hasTooltip: !!element.getAttribute('title') || !!element.getAttribute('aria-describedby')
+        hasTooltip: !!element.getAttribute('title') || !!element.getAttribute('aria-describedby'),
       },
       interactions: {
         isClickable: isElementClickable(element),
         hasHover: hasHoverEffects(element),
-        isKeyboardAccessible: element.tabIndex >= 0
+        isKeyboardAccessible: element.tabIndex >= 0,
       },
       metadata: {
         extractionMethod: 'puppeteer-style',
         visible: true,
         renderComplete: element.getAttribute('data-render-complete') === 'true',
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     };
 
     return elementData;
@@ -302,8 +318,8 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       metadata: {
         hasCanvas: !!element.querySelector('canvas'),
         hasSVG: !!element.querySelector('svg'),
-        hasLegend: !!element.querySelector('.legend, .euiLegend, .echLegend')
-      }
+        hasLegend: !!element.querySelector('.legend, .euiLegend, .echLegend'),
+      },
     };
 
     try {
@@ -315,19 +331,21 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         console.log('📊 Found numbers in text:', numbers);
 
         // Convert numbers and handle suffixes
-        const processedNumbers = numbers.map(numStr => {
-          let value = parseFloat(numStr.replace(/[KMB]/g, ''));
-          if (numStr.includes('K')) value *= 1000;
-          if (numStr.includes('M')) value *= 1000000;
-          if (numStr.includes('B')) value *= 1000000000;
-          return value;
-        }).filter(n => !isNaN(n) && n > 0);
+        const processedNumbers = numbers
+          .map((numStr) => {
+            let value = parseFloat(numStr.replace(/[KMB]/g, ''));
+            if (numStr.includes('K')) value *= 1000;
+            if (numStr.includes('M')) value *= 1000000;
+            if (numStr.includes('B')) value *= 1000000000;
+            return value;
+          })
+          .filter((n) => !isNaN(n) && n > 0);
 
         if (processedNumbers.length >= 2) {
           chartData.dataPoints = processedNumbers.slice(0, 10).map((num, index) => ({
             x: index,
             y: num,
-            label: `Value ${index + 1}: ${numbers[index]}`
+            label: `Value ${index + 1}: ${numbers[index]}`,
           }));
           console.log('✅ Extracted', chartData.dataPoints.length, 'data points from text');
         }
@@ -338,12 +356,13 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         const allElements = element.querySelectorAll('*');
         const numericElements = [];
 
-        allElements.forEach(el => {
+        allElements.forEach((el) => {
           const text = el.textContent?.trim();
-          if (text && text.length < 20) { // Short text likely to be numbers
+          if (text && text.length < 20) {
+            // Short text likely to be numbers
             const num = parseFloat(text.replace(/[^0-9.-]/g, ''));
             if (!isNaN(num) && num > 0) {
-              numericElements.push({ element: el, value: num, text: text });
+              numericElements.push({ element: el, value: num, text });
             }
           }
         });
@@ -353,7 +372,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           chartData.dataPoints = numericElements.slice(0, 10).map((item, index) => ({
             x: index,
             y: item.value,
-            label: `${item.text}`
+            label: `${item.text}`,
           }));
           console.log('✅ Extracted', chartData.dataPoints.length, 'data points from elements');
         }
@@ -369,7 +388,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           '[data-test-subj="visChart"] .chart-container',
           '.echChart text',
           '.vega-vis text',
-          '.lens-vis text'
+          '.lens-vis text',
         ];
 
         for (const selector of kibanaSelectors) {
@@ -386,7 +405,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
                   extractedData.push({
                     x: index,
                     y: num,
-                    label: text
+                    label: text,
                   });
                 }
               }
@@ -394,7 +413,11 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
 
             if (extractedData.length > 0) {
               chartData.dataPoints = extractedData.slice(0, 15);
-              console.log('✅ Extracted', chartData.dataPoints.length, 'data points from Kibana selector');
+              console.log(
+                '✅ Extracted',
+                chartData.dataPoints.length,
+                'data points from Kibana selector'
+              );
               break;
             }
           }
@@ -409,12 +432,12 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           const cells = table.querySelectorAll('td, .euiTableRowCell, [role="cell"]');
           const numericCells = [];
 
-          cells.forEach(cell => {
+          cells.forEach((cell) => {
             const text = cell.textContent?.trim();
             if (text) {
               const num = parseFloat(text.replace(/[^0-9.-]/g, ''));
               if (!isNaN(num) && num > 0) {
-                numericCells.push({ value: num, text: text });
+                numericCells.push({ value: num, text });
               }
             }
           });
@@ -424,7 +447,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             chartData.dataPoints = numericCells.slice(0, 10).map((item, index) => ({
               x: index,
               y: item.value,
-              label: item.text
+              label: item.text,
             }));
             console.log('✅ Extracted', chartData.dataPoints.length, 'data points from table');
             break;
@@ -436,22 +459,18 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       if (chartData.dataPoints.length === 0) {
         console.log('📊 Using brute force number extraction...');
 
-        const walker = document.createTreeWalker(
-          element,
-          NodeFilter.SHOW_TEXT,
-          null,
-          false
-        );
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
 
         const allNumbers = [];
         let node;
 
-        while (node = walker.nextNode()) {
+        while ((node = walker.nextNode())) {
           const text = node.textContent?.trim();
-          if (text && text.length < 50) { // Reasonable length
+          if (text && text.length < 50) {
+            // Reasonable length
             const numbers = text.match(/\b\d+(?:\.\d+)?\b/g);
             if (numbers) {
-              numbers.forEach(numStr => {
+              numbers.forEach((numStr) => {
                 const num = parseFloat(numStr);
                 if (!isNaN(num) && num > 0) {
                   allNumbers.push({ value: num, text: numStr, context: text });
@@ -464,14 +483,14 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         if (allNumbers.length >= 2) {
           console.log('📊 Brute force found numbers:', allNumbers.length);
           // Remove duplicates and take unique values
-          const uniqueNumbers = allNumbers.filter((item, index, arr) =>
-            arr.findIndex(other => other.value === item.value) === index
+          const uniqueNumbers = allNumbers.filter(
+            (item, index, arr) => arr.findIndex((other) => other.value === item.value) === index
           );
 
           chartData.dataPoints = uniqueNumbers.slice(0, 8).map((item, index) => ({
             x: index,
             y: item.value,
-            label: `${item.text} (${item.context.substring(0, 20)}...)`
+            label: `${item.text} (${item.context.substring(0, 20)}...)`,
           }));
           console.log('✅ Brute force extracted', chartData.dataPoints.length, 'data points');
         }
@@ -481,7 +500,6 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       if (chartData.dataPoints.length > 0) {
         console.log('📊 Sample data points:', chartData.dataPoints.slice(0, 3));
       }
-
     } catch (error) {
       console.warn('Simple chart data extraction error:', error);
     }
@@ -494,7 +512,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     const tableData = {
       headers: [],
       rows: [],
-      metadata: {}
+      metadata: {},
     };
 
     try {
@@ -505,7 +523,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         '.osdTable',
         '.kbn-table',
         '.react-grid-HeaderCell',
-        '.ag-grid'
+        '.ag-grid',
       ];
 
       let foundTable = null;
@@ -520,39 +538,37 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           'thead th',
           '.euiTableHeaderCell',
           '.osdTableHeaderCell',
-          '.ag-header-cell-text'
+          '.ag-header-cell-text',
         ];
 
         for (const selector of headerSelectors) {
           const headers = foundTable.querySelectorAll(selector);
           if (headers.length > 0) {
-            tableData.headers = Array.from(headers).map(cell => cell.textContent?.trim() || '');
+            tableData.headers = Array.from(headers).map((cell) => cell.textContent?.trim() || '');
             break;
           }
         }
 
         // Extract rows
-        const rowSelectors = [
-          'tbody tr',
-          '.euiTableRow',
-          '.osdTableRow',
-          '.ag-row'
-        ];
+        const rowSelectors = ['tbody tr', '.euiTableRow', '.osdTableRow', '.ag-row'];
 
         for (const selector of rowSelectors) {
           const rows = foundTable.querySelectorAll(selector);
           if (rows.length > 0) {
-            tableData.rows = Array.from(rows).slice(0, 50).map(row => {
-              const cellSelectors = ['td', '.euiTableRowCell', '.ag-cell'];
-              let cells = [];
+            tableData.rows = Array.from(rows)
+              .slice(0, 50)
+              .map((row) => {
+                const cellSelectors = ['td', '.euiTableRowCell', '.ag-cell'];
+                let cells = [];
 
-              for (const cellSelector of cellSelectors) {
-                cells = row.querySelectorAll(cellSelector);
-                if (cells.length > 0) break;
-              }
+                for (const cellSelector of cellSelectors) {
+                  cells = row.querySelectorAll(cellSelector);
+                  if (cells.length > 0) break;
+                }
 
-              return Array.from(cells).map(cell => cell.textContent?.trim() || '');
-            }).filter(row => row.length > 0);
+                return Array.from(cells).map((cell) => cell.textContent?.trim() || '');
+              })
+              .filter((row) => row.length > 0);
             break;
           }
         }
@@ -563,8 +579,10 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           visibleRows: Math.min(tableData.rows.length, 50),
           totalColumns: tableData.headers.length,
           hasPagination: !!element.querySelector('.euiPagination, .ag-paging-panel'),
-          hasSorting: !!element.querySelector('.euiTableHeaderCell--isSorted, .ag-header-cell-sorted'),
-          hasFiltering: !!element.querySelector('.euiFieldSearch, .ag-floating-filter')
+          hasSorting: !!element.querySelector(
+            '.euiTableHeaderCell--isSorted, .ag-header-cell-sorted'
+          ),
+          hasFiltering: !!element.querySelector('.euiFieldSearch, .ag-floating-filter'),
         };
       }
     } catch (error) {
@@ -578,7 +596,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   const extractMetricDataAdvanced = async (element) => {
     const metricData = {
       metrics: [],
-      metadata: {}
+      metadata: {},
     };
 
     try {
@@ -588,14 +606,14 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         '.metric-value',
         '.kbn-metric-value',
         '.visualization-metric',
-        '.metric-container .metric-value'
+        '.metric-container .metric-value',
       ];
 
       const titleSelectors = [
         '.euiStat__title',
         '.metric-title',
         '.kbn-metric-title',
-        '.visualization-title'
+        '.visualization-title',
       ];
 
       for (const selector of metricSelectors) {
@@ -609,7 +627,8 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             // Try to find associated title
             let title = 'Metric';
             for (const titleSelector of titleSelectors) {
-              const titleEl = element.querySelector(titleSelector) ||
+              const titleEl =
+                element.querySelector(titleSelector) ||
                 metricEl.parentElement?.querySelector(titleSelector) ||
                 metricEl.closest('.euiStat')?.querySelector(titleSelector);
               if (titleEl) {
@@ -623,7 +642,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
               value: parseMetricValue(value),
               displayValue: value,
               unit: extractUnit(value),
-              trend: extractTrendIndicator(element)
+              trend: extractTrendIndicator(element),
             });
           }
         }
@@ -634,7 +653,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       metricData.metadata = {
         count: metricData.metrics.length,
         hasComparison: !!element.querySelector('.comparison, .trend, .euiStat__description'),
-        hasTarget: !!element.querySelector('.target, .goal, .threshold')
+        hasTarget: !!element.querySelector('.target, .goal, .threshold'),
       };
     } catch (error) {
       console.warn('Enhanced metric data extraction error:', error);
@@ -650,12 +669,14 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     const filters = [];
 
     try {
-      const filterElements = document.querySelectorAll([
-        '[data-test-subj*="filter"]',
-        '.globalFilterItem',
-        '.filter-bar .filter',
-        '.euiFilterButton'
-      ].join(', '));
+      const filterElements = document.querySelectorAll(
+        [
+          '[data-test-subj*="filter"]',
+          '.globalFilterItem',
+          '.filter-bar .filter',
+          '.euiFilterButton',
+        ].join(', ')
+      );
 
       for (const element of filterElements) {
         const text = element.textContent?.trim();
@@ -665,7 +686,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             enabled: !element.classList.contains('disabled'),
             negated: element.classList.contains('negated'),
             pinned: element.classList.contains('pinned'),
-            type: element.getAttribute('data-filter-type') || 'unknown'
+            type: element.getAttribute('data-filter-type') || 'unknown',
           };
 
           // Try to parse field and value
@@ -747,8 +768,13 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       '.embeddable-title',
       '.panel-title',
       '.euiStat__title',
-      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      '[data-test-subj*="title"]'
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      '[data-test-subj*="title"]',
     ];
 
     for (const selector of titleSelectors) {
@@ -758,10 +784,12 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       }
     }
 
-    return element.getAttribute('title') ||
+    return (
+      element.getAttribute('title') ||
       element.getAttribute('aria-label') ||
       element.getAttribute('data-test-subj') ||
-      `Element ${element.tagName}`;
+      `Element ${element.tagName}`
+    );
   };
 
   const generateElementSummary = (element) => {
@@ -796,14 +824,16 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
 
   const extractSimpleFilters = () => {
     const filters = [];
-    const filterElements = document.querySelectorAll('[data-test-subj*="filter"], .globalFilterItem');
+    const filterElements = document.querySelectorAll(
+      '[data-test-subj*="filter"], .globalFilterItem'
+    );
 
-    Array.from(filterElements).forEach(element => {
+    Array.from(filterElements).forEach((element) => {
       const text = element.textContent?.trim();
       if (text) {
         filters.push({
           displayName: text,
-          enabled: !element.classList.contains('disabled')
+          enabled: !element.classList.contains('disabled'),
         });
       }
     });
@@ -812,11 +842,13 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   };
 
   const extractSimpleTimeRange = () => {
-    const timePickerEl = document.querySelector('[data-test-subj="superDatePickerShowDatesButton"]');
+    const timePickerEl = document.querySelector(
+      '[data-test-subj="superDatePickerShowDatesButton"]'
+    );
     if (timePickerEl) {
       return {
         displayName: timePickerEl.textContent?.trim() || 'Time range',
-        mode: 'relative'
+        mode: 'relative',
       };
     }
     return undefined;
@@ -831,17 +863,21 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
   // detectChartType function moved to enhanced extraction section above
 
   const isElementClickable = (element) => {
-    return element.onclick !== null ||
+    return (
+      element.onclick !== null ||
       element.getAttribute('role') === 'button' ||
       element.classList.contains('clickable') ||
-      element.querySelector('button, a, [role="button"]') !== null;
+      element.querySelector('button, a, [role="button"]') !== null
+    );
   };
 
   const hasHoverEffects = (element) => {
     const style = window.getComputedStyle(element);
-    return style.cursor === 'pointer' ||
+    return (
+      style.cursor === 'pointer' ||
       element.classList.contains('hoverable') ||
-      element.getAttribute('title') !== null;
+      element.getAttribute('title') !== null
+    );
   };
 
   // Duplicate helper functions removed - using enhanced versions above
@@ -851,17 +887,20 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     const breadcrumbs = [];
 
     try {
-      const breadcrumbElements = document.querySelectorAll([
-        '[data-test-subj*="breadcrumb"]',
-        '.euiBreadcrumbs .euiBreadcrumb',
-        '.breadcrumb-item',
-        'nav[aria-label="breadcrumb"] a'
-      ].join(', '));
+      const breadcrumbElements = document.querySelectorAll(
+        [
+          '[data-test-subj*="breadcrumb"]',
+          '.euiBreadcrumbs .euiBreadcrumb',
+          '.breadcrumb-item',
+          'nav[aria-label="breadcrumb"] a',
+        ].join(', ')
+      );
 
       breadcrumbElements.forEach((element, index) => {
         const text = element.textContent?.trim();
         const href = element.getAttribute('href');
-        const isActive = element.classList.contains('active') ||
+        const isActive =
+          element.classList.contains('active') ||
           element.classList.contains('euiBreadcrumb--last') ||
           index === breadcrumbElements.length - 1;
 
@@ -869,7 +908,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           breadcrumbs.push({
             text,
             href: href || undefined,
-            active: isActive
+            active: isActive,
           });
         }
       });
@@ -919,7 +958,9 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       title: document.title,
       windowSize: `${window.innerWidth}x${window.innerHeight}`,
       bodySize: `${document.body.offsetWidth}x${document.body.offsetHeight}`,
-      dashboardElements: document.querySelectorAll('[data-test-subj*="dashboard"], .dashboard-container, .react-grid-layout').length
+      dashboardElements: document.querySelectorAll(
+        '[data-test-subj*="dashboard"], .dashboard-container, .react-grid-layout'
+      ).length,
     });
 
     try {
@@ -935,8 +976,8 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           '.euiContextMenu',
           '[data-test-subj="chatFlyout"]',
           '.assistant-chat-container',
-          '.screenshot-exclude'
-        ]
+          '.screenshot-exclude',
+        ],
       });
 
       // Validate screenshot
@@ -951,7 +992,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         console.error('❌ Screenshot appears to be a placeholder:', {
           dimensions: `${screenshot.width}x${screenshot.height}`,
           size: screenshot.size,
-          dataPreview: screenshot.data.substring(0, 100)
+          dataPreview: screenshot.data.substring(0, 100),
         });
         throw new Error('Screenshot capture resulted in placeholder image');
       }
@@ -961,7 +1002,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         size: `${Math.round(screenshot.size / 1024)}KB`,
         dimensions: `${screenshot.width}x${screenshot.height}`,
         dataLength: screenshot.data.length,
-        mimeType: screenshot.mimeType
+        mimeType: screenshot.mimeType,
       });
 
       return screenshot;
@@ -972,7 +1013,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         cookiesEnabled: navigator.cookieEnabled,
         onLine: navigator.onLine,
         pageVisibility: document.visibilityState,
-        readyState: document.readyState
+        readyState: document.readyState,
       });
 
       // Don't throw - we can still send the message without screenshot
@@ -996,7 +1037,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     console.log('📍 Current page:', {
       url: window.location.href,
       pathname: window.location.pathname,
-      title: document.title
+      title: document.title,
     });
 
     try {
@@ -1010,7 +1051,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         // hasTimeRange removed - no longer used
         hasFilters: !!context.filters?.length,
         pageApp: context.page?.app,
-        extractedAt: context.extractedAt
+        extractedAt: context.extractedAt,
       });
 
       // Log first few content elements for debugging
@@ -1041,15 +1082,15 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             dashboardId: extractDashboardId(),
             savedObjectType: extractSavedObjectType(),
             lastModified: new Date().toISOString(),
-            permissions: ['read', 'view']
-          }
+            permissions: ['read', 'view'],
+          },
         },
         content: [],
         navigation: {
           currentApp: chatContext.appId || 'unknown',
           currentRoute: window.location.pathname,
           breadcrumbs: [], // Required array
-          availableApps: [] // Required array
+          availableApps: [], // Required array
         },
         filters: [], // Required array
         userActions: [], // Required array
@@ -1058,9 +1099,9 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           canModifyDashboard: false,
           canAccessApp: true,
           restrictedFields: [],
-          dataSourcePermissions: {}
+          dataSourcePermissions: {},
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       console.log('✅ Minimal fallback context created');
@@ -1082,7 +1123,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       disabled: props.disabled,
       hasInputRef: !!inputRef.current,
       inputValue: inputRef.current?.value,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     if (props.disabled || !inputRef.current) {
@@ -1094,7 +1135,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     console.log('📝 USER INPUT:', {
       original: inputRef.current.value,
       trimmed: userInput,
-      length: userInput.length
+      length: userInput.length,
     });
 
     if (!userInput) {
@@ -1112,7 +1153,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       userInput: userInput.substring(0, 50) + (userInput.length > 50 ? '...' : ''),
       userInputLength: userInput.length,
       includeScreenshot: includeContext,
-      isTakingScreenshot
+      isTakingScreenshot,
     });
 
     // Clear input immediately for better UX
@@ -1124,12 +1165,14 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     const screenshot = await captureScreenshot();
 
     // Temporarily disable UI context extraction to avoid context window overflow
-    console.log('📋 Skipping dashboard context extraction (temporarily disabled to avoid context overflow)');
+    console.log(
+      '📋 Skipping dashboard context extraction (temporarily disabled to avoid context overflow)'
+    );
     const dashboardContext = null; // Disabled for now
 
     // Check for pending visualization data from "Ask AI" button
     const pendingVisualizationData = (window as any).__pendingVisualizationData;
-    
+
     // Create input message with screenshot or visualization data if available
     const inputMessage: IMessage = {
       type: 'input',
@@ -1138,35 +1181,40 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       context: {
         appId: chatContext.appId,
         ...(pendingVisualizationData && {
-          content: `Visualization: ${pendingVisualizationData.visualizationTitle}`
-        })
+          content: `Visualization: ${pendingVisualizationData.visualizationTitle}`,
+        }),
       },
       ...(screenshot && {
-        images: [{
-          data: screenshot.data,
-          mimeType: screenshot.mimeType,
-          filename: screenshot.filename
-        }]
+        images: [
+          {
+            data: screenshot.data,
+            mimeType: screenshot.mimeType,
+            filename: screenshot.filename,
+          },
+        ],
       }),
-      ...(pendingVisualizationData && !screenshot && {
-        images: [{
-          data: pendingVisualizationData.imageData,
-          mimeType: pendingVisualizationData.mimeType,
-          filename: pendingVisualizationData.filename
-        }]
-      })
+      ...(pendingVisualizationData &&
+        !screenshot && {
+          images: [
+            {
+              data: pendingVisualizationData.imageData,
+              mimeType: pendingVisualizationData.mimeType,
+              filename: pendingVisualizationData.filename,
+            },
+          ],
+        }),
     };
 
     // Clear pending visualization data after using it
     if (pendingVisualizationData) {
       delete (window as any).__pendingVisualizationData;
-      
+
       // Remove the image preview from UI
       const preview = document.querySelector('.visualization-image-preview');
       if (preview) {
         preview.remove();
       }
-      
+
       console.log('📊 Used pending visualization data in message');
     }
 
@@ -1175,7 +1223,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       console.error('❌ CRITICAL: Input message content is empty!', {
         originalUserInput: userInput,
         messageContent: inputMessage.content,
-        messageContentLength: inputMessage.content?.length || 0
+        messageContentLength: inputMessage.content?.length || 0,
       });
       return;
     }
@@ -1191,12 +1239,11 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
       hasImages: !!inputMessage.images?.length,
       imageCount: inputMessage.images?.length || 0,
       contextDisabled: 'UI context extraction temporarily disabled to avoid context overflow',
-      useStreaming: useStreaming && !!streamingChat
+      useStreaming: useStreaming && !!streamingChat,
     });
 
     // Send message with streaming support if enabled
     if (useStreaming && streamingChat) {
-
       // Add user's input message to chat state first (frontend maintains conversation history)
       // Create a user message for the chat state with proper structure
       const userMessage = {
@@ -1209,14 +1256,14 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           appId: chatContext.appId,
         },
         ...(inputMessage.images && {
-          images: inputMessage.images
-        })
+          images: inputMessage.images,
+        }),
       };
 
       console.log('📨 Dispatching user message to chat state:', {
         messageId: userMessage.messageId,
         content: userMessage.content.substring(0, 50) + '...',
-        hasImages: !!userMessage.images?.length
+        hasImages: !!userMessage.images?.length,
       });
 
       // Add user message to chat state using the send action
@@ -1289,8 +1336,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             <span style={{ fontSize: '12px', color: '#69707D' }}>
               {isTakingScreenshot
                 ? 'Taking screenshot...'
-                : 'Screenshot will be included with your message'
-              }
+                : 'Screenshot will be included with your message'}
             </span>
           </EuiFlexItem>
         )}
@@ -1298,10 +1344,7 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
         {useStreaming && streamingChat && (
           <EuiFlexItem grow={false}>
             <span style={{ fontSize: '12px', color: '#0078A0' }}>
-              {streamingChat.isStreaming
-                ? 'Streaming response...'
-                : 'Streaming enabled'
-              }
+              {streamingChat.isStreaming ? 'Streaming response...' : 'Streaming enabled'}
             </span>
           </EuiFlexItem>
         )}
@@ -1322,7 +1365,9 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             compressed
             autoFocus
             disabled={props.disabled || isTakingScreenshot}
-            placeholder={includeContext ? "Ask about your dashboard screenshot..." : "Ask me anything..."}
+            placeholder={
+              includeContext ? 'Ask about your dashboard screenshot...' : 'Ask me anything...'
+            }
             inputRef={inputRef}
             style={{ minHeight: 40, maxHeight: 400 }}
             onKeyPress={(e) => {
@@ -1338,20 +1383,23 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
             aria-label="send"
             minWidth={70}
             fill
-            iconType={props.loading || isTakingScreenshot || (streamingChat?.isStreaming) ? undefined : 'returnKey'}
+            iconType={
+              props.loading || isTakingScreenshot || streamingChat?.isStreaming
+                ? undefined
+                : 'returnKey'
+            }
             iconSide="right"
             size="m"
             onClick={onSubmit}
-            isDisabled={props.disabled || isTakingScreenshot || (streamingChat?.isStreaming)}
+            isDisabled={props.disabled || isTakingScreenshot || streamingChat?.isStreaming}
           >
             {streamingChat?.isStreaming
               ? 'Streaming...'
               : props.loading
-                ? 'Generating...'
-                : isTakingScreenshot
-                  ? 'Capturing...'
-                  : 'Go'
-            }
+              ? 'Generating...'
+              : isTakingScreenshot
+              ? 'Capturing...'
+              : 'Go'}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false} />

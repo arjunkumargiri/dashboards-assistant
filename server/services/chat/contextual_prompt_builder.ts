@@ -10,7 +10,7 @@ import { ContentPrioritizer } from './content_prioritizer';
 
 /**
  * Contextual Prompt Builder - Snapshot-based approach
- * 
+ *
  * This service builds contextual prompts by enhancing user messages
  * with relevant UI context information extracted from snapshots.
  */
@@ -45,26 +45,22 @@ export class ContextualPromptBuilder {
       }
 
       // Build contextual prompt
-      const contextualPrompt = await this.buildContextualPrompt(
-        lastMessage.content,
-        uiContext
-      );
+      const contextualPrompt = await this.buildContextualPrompt(lastMessage.content, uiContext);
 
       // Create enhanced message
       const enhancedMessages = [...messages];
       enhancedMessages[enhancedMessages.length - 1] = {
         ...lastMessage,
-        content: contextualPrompt
+        content: contextualPrompt,
       };
 
       this.logger.debug('Enhanced message with UI context', {
         originalLength: lastMessage.content.length,
         enhancedLength: contextualPrompt.length,
-        contextElements: uiContext.content?.length || 0
+        contextElements: uiContext.content?.length || 0,
       });
 
       return enhancedMessages;
-
     } catch (error) {
       this.logger.error('Error enhancing messages with context:', error);
       return messages; // Return original messages on error
@@ -74,10 +70,7 @@ export class ContextualPromptBuilder {
   /**
    * Build contextual prompt from user input and UI context
    */
-  private async buildContextualPrompt(
-    userInput: string,
-    uiContext: UIContext
-  ): Promise<string> {
+  private async buildContextualPrompt(userInput: string, uiContext: UIContext): Promise<string> {
     const contextParts: string[] = [];
 
     // Add page context if enabled
@@ -92,7 +85,7 @@ export class ContextualPromptBuilder {
         userInput,
         this.config.maxContentElements
       );
-      
+
       if (prioritizedContent.length > 0) {
         contextParts.push(this.buildContentContextPrompt(prioritizedContent));
       }
@@ -108,7 +101,11 @@ export class ContextualPromptBuilder {
     }
 
     // Add user actions if enabled and available
-    if (this.config.includeUserActions && uiContext.userActions && uiContext.userActions.length > 0) {
+    if (
+      this.config.includeUserActions &&
+      uiContext.userActions &&
+      uiContext.userActions.length > 0
+    ) {
       contextParts.push(this.buildUserActionsContextPrompt(uiContext.userActions));
     }
 
@@ -117,7 +114,9 @@ export class ContextualPromptBuilder {
       return userInput; // No context available
     }
 
-    const contextPrompt = `Context: I'm currently viewing a ${uiContext.page?.app || 'dashboard'} page with the following information:
+    const contextPrompt = `Context: I'm currently viewing a ${
+      uiContext.page?.app || 'dashboard'
+    } page with the following information:
 
 ${contextParts.join('\n\n')}
 
@@ -135,8 +134,12 @@ Please provide a helpful response based on the context above. Focus on the speci
     return `Page Information:
 - App: ${page.app}
 - Title: ${page.title}
-- URL: ${page.url}${page.breadcrumbs ? `
-- Navigation: ${page.breadcrumbs.map(b => b.text).join(' > ')}` : ''}`;
+- URL: ${page.url}${
+      page.breadcrumbs
+        ? `
+- Navigation: ${page.breadcrumbs.map((b) => b.text).join(' > ')}`
+        : ''
+    }`;
   }
 
   /**
@@ -145,7 +148,7 @@ Please provide a helpful response based on the context above. Focus on the speci
   private buildContentContextPrompt(content: UIContext['content']): string {
     const contentDescriptions = content.map((item, index) => {
       let description = `${index + 1}. ${item.title || 'Untitled'} (${item.type})`;
-      
+
       if (item.description) {
         description += `: ${item.description}`;
       }
@@ -172,8 +175,8 @@ ${contentDescriptions.join('\n')}`;
    */
   private buildFiltersContextPrompt(filters: UIContext['filters']): string {
     const filterDescriptions = filters
-      .filter(f => f.enabled)
-      .map(f => `- ${f.displayName || `${f.field} ${f.operator} ${f.value}`}`);
+      .filter((f) => f.enabled)
+      .map((f) => `- ${f.displayName || `${f.field} ${f.operator} ${f.value}`}`);
 
     return `Active Filters:
 ${filterDescriptions.join('\n')}`;
@@ -192,7 +195,7 @@ ${filterDescriptions.join('\n')}`;
   private buildUserActionsContextPrompt(userActions: UIContext['userActions']): string {
     const recentActions = userActions
       .slice(-5) // Last 5 actions
-      .map(action => `- ${action.type}: ${JSON.stringify(action.details)}`)
+      .map((action) => `- ${action.type}: ${JSON.stringify(action.details)}`)
       .join('\n');
 
     return `Recent User Actions:

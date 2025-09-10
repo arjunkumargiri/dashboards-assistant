@@ -21,7 +21,7 @@ export class ChatServiceFactory {
   ): ChatService {
     // Create the base chat service
     let baseChatService: ChatService;
-    
+
     if (config.aiAgent.enabled) {
       logger.info('Using OpenSearch-Agents chat service');
       baseChatService = new OpenSearchAgentsChatService(config.aiAgent, logger);
@@ -33,41 +33,45 @@ export class ChatServiceFactory {
     // Wrap with contextual chat service if enabled
     if (config.contextualChat?.enabled) {
       logger.info('Contextual chat is enabled, wrapping base service with contextual capabilities');
-      
+
       try {
         // Create contextual chat components
         const contentPrioritizerConfig = {
           enableSemanticScoring: true,
           keywordWeights: {
-            'chart': 2,
-            'graph': 2,
-            'table': 2,
-            'data': 1.5,
-            'visualization': 2,
-            'metric': 2,
-            'trend': 1.8,
-            'filter': 1.5,
-            'search': 1.5,
-            'analysis': 1.8,
-            'insight': 1.8,
-            'performance': 1.6,
-            'error': 2,
-            'alert': 2
+            chart: 2,
+            graph: 2,
+            table: 2,
+            data: 1.5,
+            visualization: 2,
+            metric: 2,
+            trend: 1.8,
+            filter: 1.5,
+            search: 1.5,
+            analysis: 1.8,
+            insight: 1.8,
+            performance: 1.6,
+            error: 2,
+            alert: 2,
           },
-          typeWeights: {} as any // Will use defaults from ContentPrioritizer
+          typeWeights: {} as any, // Will use defaults from ContentPrioritizer
         };
-        
+
         const contentPrioritizer = new ContentPrioritizer(logger, contentPrioritizerConfig);
-        
+
         // Create prompt builder configuration
         const promptBuilderConfig = {
           maxContentElements: config.contextualChat.performance?.maxContentElements || 50,
           includePageContext: true,
           includeUserActions: true,
-          contentRelevanceThreshold: 0.3
+          contentRelevanceThreshold: 0.3,
         };
-        
-        const promptBuilder = new ContextualPromptBuilder(contentPrioritizer, logger, promptBuilderConfig);
+
+        const promptBuilder = new ContextualPromptBuilder(
+          contentPrioritizer,
+          logger,
+          promptBuilderConfig
+        );
         const responseProcessor = new ContextualResponseProcessor(logger);
 
         // Create contextual configuration
@@ -77,7 +81,7 @@ export class ChatServiceFactory {
           enableStandardChatFallback: true,
           maxRetryAttempts: 2,
           retryBackoffMs: 1000,
-          fallbackToStandard: true
+          fallbackToStandard: true,
         };
 
         // Wrap base service with contextual capabilities
@@ -92,7 +96,10 @@ export class ChatServiceFactory {
         logger.info('Contextual chat service initialized successfully');
         return contextualService as any; // Type assertion needed due to interface differences
       } catch (error) {
-        logger.error('Failed to initialize contextual chat service, falling back to base service:', error);
+        logger.error(
+          'Failed to initialize contextual chat service, falling back to base service:',
+          error
+        );
         return baseChatService;
       }
     }

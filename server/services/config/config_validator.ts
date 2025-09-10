@@ -84,10 +84,16 @@ export class ConfigValidator {
             return { isValid: false, message: 'contextCacheTTL must be at least 30 seconds' };
           }
           if (value > 7200) {
-            return { isValid: true, message: 'contextCacheTTL > 2 hours may consume excessive memory' };
+            return {
+              isValid: true,
+              message: 'contextCacheTTL > 2 hours may consume excessive memory',
+            };
           }
           if (value < 60) {
-            return { isValid: true, message: 'contextCacheTTL < 60 seconds may cause frequent cache misses' };
+            return {
+              isValid: true,
+              message: 'contextCacheTTL < 60 seconds may cause frequent cache misses',
+            };
           }
           return { isValid: true };
         },
@@ -108,7 +114,10 @@ export class ConfigValidator {
             return { isValid: false, message: 'extractionTimeout cannot exceed 30000ms' };
           }
           if (value > 10000) {
-            return { isValid: true, message: 'extractionTimeout > 10s may cause poor user experience' };
+            return {
+              isValid: true,
+              message: 'extractionTimeout > 10s may cause poor user experience',
+            };
           }
           return { isValid: true };
         },
@@ -150,7 +159,10 @@ export class ConfigValidator {
             return { isValid: false, message: 'performance.maxContentElements cannot exceed 500' };
           }
           if (value > 100) {
-            return { isValid: true, message: 'performance.maxContentElements > 100 may impact performance' };
+            return {
+              isValid: true,
+              message: 'performance.maxContentElements > 100 may impact performance',
+            };
           }
           return { isValid: true };
         },
@@ -165,7 +177,10 @@ export class ConfigValidator {
             return { isValid: false, message: 'security.respectPermissions must be a boolean' };
           }
           if (!value && config.enabled) {
-            return { isValid: true, message: 'Disabling permission checks may expose unauthorized data' };
+            return {
+              isValid: true,
+              message: 'Disabling permission checks may expose unauthorized data',
+            };
           }
           return { isValid: true };
         },
@@ -267,7 +282,8 @@ export class ConfigValidator {
         field: 'performance',
         message: 'Lazy loading is most effective with higher maxContentElements',
         severity: 'warning',
-        suggestion: 'Consider increasing maxContentElements to at least 20 when lazy loading is enabled',
+        suggestion:
+          'Consider increasing maxContentElements to at least 20 when lazy loading is enabled',
       });
     }
 
@@ -300,9 +316,9 @@ export class ConfigValidator {
     if (result.isValid) return undefined;
 
     const suggestions: Record<string, string> = {
-      'maxVisualizations': 'Recommended range: 10-30 for optimal performance',
-      'contextCacheTTL': 'Recommended range: 300-1800 seconds (5-30 minutes)',
-      'extractionTimeout': 'Recommended range: 3000-8000ms for good UX',
+      maxVisualizations: 'Recommended range: 10-30 for optimal performance',
+      contextCacheTTL: 'Recommended range: 300-1800 seconds (5-30 minutes)',
+      extractionTimeout: 'Recommended range: 3000-8000ms for good UX',
       'performance.debounceMs': 'Recommended range: 200-800ms for responsive feel',
       'performance.maxContentElements': 'Recommended range: 20-50 for balanced performance',
     };
@@ -316,7 +332,7 @@ export class ConfigValidator {
   }
 
   public removeRule(field: string): void {
-    this.rules = this.rules.filter(rule => rule.field !== field);
+    this.rules = this.rules.filter((rule) => rule.field !== field);
     this.logger.info(`Removed validation rule for field: ${field}`);
   }
 }

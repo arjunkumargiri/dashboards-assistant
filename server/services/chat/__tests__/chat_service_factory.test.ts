@@ -24,15 +24,35 @@ describe('ChatServiceFactory', () => {
   it('should create OllyChatService when aiAgent is disabled', () => {
     const config: ConfigSchema = {
       enabled: true,
-      chat: { enabled: true, trace: true, feedback: true, allowRenameConversation: true, deleteConversation: true, regenerateMessage: true, showConversationHistory: true },
+      chat: {
+        enabled: true,
+        trace: true,
+        feedback: true,
+        allowRenameConversation: true,
+        deleteConversation: true,
+        regenerateMessage: true,
+        showConversationHistory: true,
+      },
       incontextInsight: { enabled: true },
       next: { enabled: false },
       text2viz: { enabled: false },
       alertInsight: { enabled: false },
       smartAnomalyDetector: { enabled: false },
-      contextualChat: { enabled: false, maxVisualizations: 20, contextCacheTTL: 300, extractionTimeout: 5000, security: { respectPermissions: true, auditAccess: true }, performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true } },
-      aiAgent: { enabled: false, baseUrl: 'http://localhost:8000', timeout: 300000, healthCheckInterval: 60000 },
-      branding: {}
+      contextualChat: {
+        enabled: false,
+        maxVisualizations: 20,
+        contextCacheTTL: 300,
+        extractionTimeout: 5000,
+        security: { respectPermissions: true, auditAccess: true },
+        performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true },
+      },
+      aiAgent: {
+        enabled: false,
+        baseUrl: 'http://localhost:8000',
+        timeout: 300000,
+        healthCheckInterval: 60000,
+      },
+      branding: {},
     };
 
     const service = ChatServiceFactory.create(config, mockOpenSearchTransport, mockLogger);
@@ -44,15 +64,35 @@ describe('ChatServiceFactory', () => {
   it('should create OpenSearchAgentsChatService when aiAgent is enabled', () => {
     const config: ConfigSchema = {
       enabled: true,
-      chat: { enabled: true, trace: true, feedback: true, allowRenameConversation: true, deleteConversation: true, regenerateMessage: true, showConversationHistory: true },
+      chat: {
+        enabled: true,
+        trace: true,
+        feedback: true,
+        allowRenameConversation: true,
+        deleteConversation: true,
+        regenerateMessage: true,
+        showConversationHistory: true,
+      },
       incontextInsight: { enabled: true },
       next: { enabled: false },
       text2viz: { enabled: false },
       alertInsight: { enabled: false },
       smartAnomalyDetector: { enabled: false },
-      contextualChat: { enabled: false, maxVisualizations: 20, contextCacheTTL: 300, extractionTimeout: 5000, security: { respectPermissions: true, auditAccess: true }, performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true } },
-      aiAgent: { enabled: true, baseUrl: 'http://localhost:8000', timeout: 300000, healthCheckInterval: 60000 },
-      branding: {}
+      contextualChat: {
+        enabled: false,
+        maxVisualizations: 20,
+        contextCacheTTL: 300,
+        extractionTimeout: 5000,
+        security: { respectPermissions: true, auditAccess: true },
+        performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true },
+      },
+      aiAgent: {
+        enabled: true,
+        baseUrl: 'http://localhost:8000',
+        timeout: 300000,
+        healthCheckInterval: 60000,
+      },
+      branding: {},
     };
 
     const service = ChatServiceFactory.create(config, mockOpenSearchTransport, mockLogger);
@@ -64,37 +104,81 @@ describe('ChatServiceFactory', () => {
   it('should wrap with contextual chat service when contextualChat is enabled', () => {
     const config: ConfigSchema = {
       enabled: true,
-      chat: { enabled: true, trace: true, feedback: true, allowRenameConversation: true, deleteConversation: true, regenerateMessage: true, showConversationHistory: true },
+      chat: {
+        enabled: true,
+        trace: true,
+        feedback: true,
+        allowRenameConversation: true,
+        deleteConversation: true,
+        regenerateMessage: true,
+        showConversationHistory: true,
+      },
       incontextInsight: { enabled: true },
       next: { enabled: false },
       text2viz: { enabled: false },
       alertInsight: { enabled: false },
       smartAnomalyDetector: { enabled: false },
-      contextualChat: { enabled: true, maxVisualizations: 20, contextCacheTTL: 300, extractionTimeout: 5000, security: { respectPermissions: true, auditAccess: true }, performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true } },
-      aiAgent: { enabled: false, baseUrl: 'http://localhost:8000', timeout: 300000, healthCheckInterval: 60000 },
-      branding: {}
+      contextualChat: {
+        enabled: true,
+        maxVisualizations: 20,
+        contextCacheTTL: 300,
+        extractionTimeout: 5000,
+        security: { respectPermissions: true, auditAccess: true },
+        performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true },
+      },
+      aiAgent: {
+        enabled: false,
+        baseUrl: 'http://localhost:8000',
+        timeout: 300000,
+        healthCheckInterval: 60000,
+      },
+      branding: {},
     };
 
     const service = ChatServiceFactory.create(config, mockOpenSearchTransport, mockLogger);
 
     expect(service).toBeDefined();
     expect(mockLogger.info).toHaveBeenCalledWith('Using ML-Commons (Olly) chat service');
-    expect(mockLogger.info).toHaveBeenCalledWith('Contextual chat is enabled, wrapping base service with contextual capabilities');
-    expect(mockLogger.info).toHaveBeenCalledWith('Contextual chat service initialized successfully');
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'Contextual chat is enabled, wrapping base service with contextual capabilities'
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'Contextual chat service initialized successfully'
+    );
   });
 
   it('should fallback to base service if contextual chat initialization fails', () => {
     const config: ConfigSchema = {
       enabled: true,
-      chat: { enabled: true, trace: true, feedback: true, allowRenameConversation: true, deleteConversation: true, regenerateMessage: true, showConversationHistory: true },
+      chat: {
+        enabled: true,
+        trace: true,
+        feedback: true,
+        allowRenameConversation: true,
+        deleteConversation: true,
+        regenerateMessage: true,
+        showConversationHistory: true,
+      },
       incontextInsight: { enabled: true },
       next: { enabled: false },
       text2viz: { enabled: false },
       alertInsight: { enabled: false },
       smartAnomalyDetector: { enabled: false },
-      contextualChat: { enabled: true, maxVisualizations: 20, contextCacheTTL: 300, extractionTimeout: 5000, security: { respectPermissions: true, auditAccess: true }, performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true } },
-      aiAgent: { enabled: false, baseUrl: 'http://localhost:8000', timeout: 300000, healthCheckInterval: 60000 },
-      branding: {}
+      contextualChat: {
+        enabled: true,
+        maxVisualizations: 20,
+        contextCacheTTL: 300,
+        extractionTimeout: 5000,
+        security: { respectPermissions: true, auditAccess: true },
+        performance: { debounceMs: 500, maxContentElements: 50, enableLazyLoading: true },
+      },
+      aiAgent: {
+        enabled: false,
+        baseUrl: 'http://localhost:8000',
+        timeout: 300000,
+        healthCheckInterval: 60000,
+      },
+      branding: {},
     };
 
     // Mock ContentPrioritizer to throw an error
@@ -102,7 +186,7 @@ describe('ChatServiceFactory', () => {
       return {
         ContentPrioritizer: jest.fn().mockImplementation(() => {
           throw new Error('Mock initialization error');
-        })
+        }),
       };
     });
 

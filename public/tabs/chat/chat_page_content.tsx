@@ -212,8 +212,8 @@ export const ChatPageContent: React.FC<ChatPageContentProps> = React.memo((props
             style={
               isLatestOutput
                 ? {
-                  minHeight: messageSpacerHeight,
-                }
+                    minHeight: messageSpacerHeight,
+                  }
                 : {}
             }
           >

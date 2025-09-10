@@ -1,7 +1,12 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * Example client-side code for consuming streaming chat responses
  * from OpenSearch Dashboards Assistant.
- * 
+ *
  * This demonstrates how to use the streaming API endpoint to get
  * real-time responses from the AI agent.
  */
@@ -28,11 +33,11 @@ class StreamingChatClient {
         content: query,
         contentType: 'text',
         context: {
-          appId: 'dashboards-assistant'
-        }
+          appId: 'dashboards-assistant',
+        },
       },
       messages: [],
-      conversationId
+      conversationId,
     };
 
     try {
@@ -42,7 +47,7 @@ class StreamingChatClient {
           'Content-Type': 'application/json',
           'osd-xsrf': 'true', // Required for OpenSearch Dashboards
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -95,7 +100,6 @@ class StreamingChatClient {
       } finally {
         reader.releaseLock();
       }
-
     } catch (error) {
       if (onError) {
         onError(error);
@@ -117,11 +121,11 @@ class StreamingChatClient {
         content: query,
         contentType: 'text',
         context: {
-          appId: 'dashboards-assistant'
-        }
+          appId: 'dashboards-assistant',
+        },
       },
       messages: [],
-      conversationId
+      conversationId,
     };
 
     const response = await fetch(`${this.baseUrl}/api/assistant/send_message`, {
@@ -130,7 +134,7 @@ class StreamingChatClient {
         'Content-Type': 'application/json',
         'osd-xsrf': 'true',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -154,46 +158,49 @@ function useStreamingChat() {
 
   const client = React.useMemo(() => new StreamingChatClient(), []);
 
-  const sendStreamingMessage = React.useCallback(async (query) => {
-    setIsStreaming(true);
-    setCurrentResponse('');
-    setError(null);
+  const sendStreamingMessage = React.useCallback(
+    async (query) => {
+      setIsStreaming(true);
+      setCurrentResponse('');
+      setError(null);
 
-    await client.streamChat(
-      { query, conversationId },
-      // onChunk
-      (chunk) => {
-        switch (chunk.type) {
-          case 'start':
-            setConversationId(chunk.conversationId);
-            break;
-          case 'content':
-            setCurrentResponse(chunk.accumulatedContent || '');
-            break;
-          case 'complete':
-            setCurrentResponse(chunk.messages?.[0]?.content || chunk.accumulatedContent || '');
-            setIsStreaming(false);
-            break;
+      await client.streamChat(
+        { query, conversationId },
+        // onChunk
+        (chunk) => {
+          switch (chunk.type) {
+            case 'start':
+              setConversationId(chunk.conversationId);
+              break;
+            case 'content':
+              setCurrentResponse(chunk.accumulatedContent || '');
+              break;
+            case 'complete':
+              setCurrentResponse(chunk.messages?.[0]?.content || chunk.accumulatedContent || '');
+              setIsStreaming(false);
+              break;
+          }
+        },
+        // onError
+        (err) => {
+          setError(err.message);
+          setIsStreaming(false);
+        },
+        // onComplete
+        () => {
+          setIsStreaming(false);
         }
-      },
-      // onError
-      (err) => {
-        setError(err.message);
-        setIsStreaming(false);
-      },
-      // onComplete
-      () => {
-        setIsStreaming(false);
-      }
-    );
-  }, [client, conversationId]);
+      );
+    },
+    [client, conversationId]
+  );
 
   return {
     sendStreamingMessage,
     isStreaming,
     currentResponse,
     conversationId,
-    error
+    error,
   };
 }
 
@@ -220,7 +227,8 @@ function exampleUsage() {
           break;
         case 'complete':
           statusContainer.textContent = 'Complete';
-          responseContainer.textContent = chunk.messages?.[0]?.content || chunk.accumulatedContent || '';
+          responseContainer.textContent =
+            chunk.messages?.[0]?.content || chunk.accumulatedContent || '';
           break;
       }
     },

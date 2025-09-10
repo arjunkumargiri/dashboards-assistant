@@ -159,7 +159,9 @@ describe('TroubleshootingTools', () => {
       expect(report.overallStatus).toBe('critical');
       expect(report.results[0].result.passed).toBe(false);
       expect(report.results[0].result.message).toContain('Connection failed');
-      expect(report.results[0].result.suggestions).toContain('Check OpenSearch cluster connectivity');
+      expect(report.results[0].result.suggestions).toContain(
+        'Check OpenSearch cluster connectivity'
+      );
     });
 
     it('should check memory usage', async () => {
@@ -304,7 +306,9 @@ describe('TroubleshootingTools', () => {
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'contextual-chat-diagnostic-reports',
         report,
-        { id: `report-${report.timestamp}` }
+        {
+          id: `report-${report.timestamp}`,
+        }
       );
     });
 
@@ -327,7 +331,7 @@ describe('TroubleshootingTools', () => {
       ];
 
       mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockReports.map(report => ({ attributes: report })),
+        saved_objects: mockReports.map((report) => ({ attributes: report })),
         total: 2,
         per_page: 10,
         page: 1,
@@ -461,7 +465,9 @@ describe('TroubleshootingTools', () => {
     it('should allow removing diagnostic tests', () => {
       troubleshootingTools.removeDiagnosticTest('Configuration Validation');
 
-      expect(mockLogger.debug).toHaveBeenCalledWith('Removed diagnostic test: Configuration Validation');
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Removed diagnostic test: Configuration Validation'
+      );
     });
 
     it('should run custom diagnostic tests', async () => {
@@ -573,9 +579,7 @@ describe('TroubleshootingTools', () => {
 
       const report = await troubleshootingTools.runDiagnostics();
 
-      expect(report.recommendations).toContain(
-        'Consider restarting the contextual chat service'
-      );
+      expect(report.recommendations).toContain('Consider restarting the contextual chat service');
     });
 
     it('should provide positive recommendation for healthy system', async () => {

@@ -40,7 +40,7 @@ export class SimpleButtonInjector {
     console.log('UiActions:', !!this.uiActions);
     console.log('Embeddable:', !!this.embeddable);
     console.log('VisualizationChatIntegration:', !!this.visualizationChatIntegration);
-    
+
     // Initial injection
     this.injectButtonsIntoExistingPanels();
 
@@ -70,16 +70,18 @@ export class SimpleButtonInjector {
     console.log('🔍 Looking for existing panels...');
     const panels = document.querySelectorAll('[data-test-subj="embeddablePanelHeading"]');
     console.log(`Found ${panels.length} panels for button injection`);
-    
+
     if (panels.length === 0) {
-      console.log('⚠️ No panels found. User may need to navigate to a dashboard with visualizations.');
+      console.log(
+        '⚠️ No panels found. User may need to navigate to a dashboard with visualizations.'
+      );
     }
-    
+
     panels.forEach((panel, index) => {
       console.log(`Processing panel ${index + 1}...`);
       this.injectButtonIntoPanel(panel as HTMLElement);
     });
-    
+
     console.log(`Completed processing ${panels.length} panels`);
   }
 
@@ -92,14 +94,16 @@ export class SimpleButtonInjector {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as HTMLElement;
-            
+
             // Check if it's a panel heading
             if (element.matches('[data-test-subj="embeddablePanelHeading"]')) {
               this.injectButtonIntoPanel(element);
             }
-            
+
             // Check for panel headings inside the added node
-            const panelHeadings = element.querySelectorAll('[data-test-subj="embeddablePanelHeading"]');
+            const panelHeadings = element.querySelectorAll(
+              '[data-test-subj="embeddablePanelHeading"]'
+            );
             panelHeadings.forEach((panel) => {
               this.injectButtonIntoPanel(panel as HTMLElement);
             });
@@ -120,7 +124,7 @@ export class SimpleButtonInjector {
   private injectButtonIntoPanel(panelElement: HTMLElement): void {
     try {
       console.log('🔧 Attempting to inject button into panel...');
-      
+
       // Get embeddable ID
       const embeddableId = this.getEmbeddableIdFromPanel(panelElement);
       console.log(`Embeddable ID: ${embeddableId}`);
@@ -136,7 +140,9 @@ export class SimpleButtonInjector {
       }
 
       // Find options menu
-      const optionsMenu = panelElement.querySelector('[data-test-subj="embeddablePanelToggleMenuIcon"]');
+      const optionsMenu = panelElement.querySelector(
+        '[data-test-subj="embeddablePanelToggleMenuIcon"]'
+      );
       console.log(`Options menu found: ${!!optionsMenu}`);
       console.log(`Options menu parent: ${!!(optionsMenu && optionsMenu.parentElement)}`);
       if (!optionsMenu || !optionsMenu.parentElement) {
@@ -157,7 +163,7 @@ export class SimpleButtonInjector {
       button.setAttribute('data-test-subj', 'embeddablePanelAskAIButton');
       button.setAttribute('aria-label', 'Ask AI about this visualization');
       button.title = 'Ask AI about this visualization';
-      
+
       // Button styling
       button.style.cssText = `
         background-color: #0078d4;
@@ -241,7 +247,7 @@ export class SimpleButtonInjector {
       await this.visualizationChatIntegration.handleChatOpen('', title, embeddableId);
     } catch (error) {
       console.error('❌ Failed to handle simple Ask AI click:', error);
-      
+
       this.core.notifications.toasts.addError(error as Error, {
         title: 'Failed to start Ask AI',
       });
@@ -256,7 +262,7 @@ export class SimpleButtonInjector {
     buttonContainers.forEach((container) => {
       container.remove();
     });
-    
+
     this.injectedButtons.clear();
   }
 }

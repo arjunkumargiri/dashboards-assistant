@@ -82,7 +82,7 @@ export class ContextualChatConfigService {
 
   public updateRuntimeConfig(updates: Partial<ContextualChatRuntimeConfig>): void {
     this.logger.info('Updating runtime configuration', updates);
-    
+
     // Update internal config object
     if (updates.maxVisualizations !== undefined) {
       this.config.maxVisualizations = updates.maxVisualizations;
@@ -120,7 +120,9 @@ export class ContextualChatConfigService {
     }
 
     if (this.config.contextCacheTTL < 60 || this.config.contextCacheTTL > 3600) {
-      warnings.push('contextCacheTTL should be between 60 and 3600 seconds for optimal performance');
+      warnings.push(
+        'contextCacheTTL should be between 60 and 3600 seconds for optimal performance'
+      );
     }
 
     if (this.config.extractionTimeout < 1000 || this.config.extractionTimeout > 30000) {
@@ -131,7 +133,10 @@ export class ContextualChatConfigService {
       warnings.push('debounceMs should be between 100 and 2000 milliseconds for optimal UX');
     }
 
-    if (this.config.performance.maxContentElements < 10 || this.config.performance.maxContentElements > 200) {
+    if (
+      this.config.performance.maxContentElements < 10 ||
+      this.config.performance.maxContentElements > 200
+    ) {
       warnings.push('maxContentElements should be between 10 and 200 for optimal performance');
     }
 

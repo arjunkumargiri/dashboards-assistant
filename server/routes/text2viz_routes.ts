@@ -59,7 +59,7 @@ export function registerText2VizRoutes(router: IRouter, assistantService: Assist
         let textContent = response.body.inference_results[0].output[0].result;
         // Check if the visualization is single value:
         // it should have exactly 1 metric and no dimensions.
-        let ifSingleMetric = checkSingleMetric(textContent);
+        const ifSingleMetric = checkSingleMetric(textContent);
 
         // extra content between tag <vega-lite></vega-lite>
         const startTag = '<vega-lite>';

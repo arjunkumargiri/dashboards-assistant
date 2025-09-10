@@ -54,17 +54,21 @@ export class AssistantPlugin implements Plugin<AssistantPluginSetup, AssistantPl
     // Initialize contextual chat service registry if enabled
     if (config.contextualChat?.enabled) {
       this.logger.info('Contextual chat feature is enabled (snapshot-based approach)');
-      
+
       // Register contextual chat saved object types (if any)
       if (contextualChatSavedObjectTypes.length > 0) {
-        contextualChatSavedObjectTypes.forEach(type => {
+        contextualChatSavedObjectTypes.forEach((type) => {
           core.savedObjects.registerType(type);
         });
-        this.logger.debug(`Registered ${contextualChatSavedObjectTypes.length} contextual chat saved object types`);
+        this.logger.debug(
+          `Registered ${contextualChatSavedObjectTypes.length} contextual chat saved object types`
+        );
       } else {
-        this.logger.debug('No contextual chat saved object types to register (snapshot-based approach)');
+        this.logger.debug(
+          'No contextual chat saved object types to register (snapshot-based approach)'
+        );
       }
-      
+
       // Initialize and register contextual chat services
       try {
         initializeContextualChatServices(config, this.logger);

@@ -73,15 +73,17 @@ describe('ContextualChatConfigService', () => {
   describe('feature flag management', () => {
     it('should update feature flags correctly', () => {
       configService.updateFeatureFlag('contentExtraction', false);
-      
+
       const flags = configService.getFeatureFlags();
       expect(flags.contentExtraction).toBe(false);
-      expect(mockLogger.info).toHaveBeenCalledWith('Updating feature flag contentExtraction to false');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Updating feature flag contentExtraction to false'
+      );
     });
 
     it('should check if feature is enabled', () => {
       expect(configService.isFeatureEnabled('enabled')).toBe(true);
-      
+
       configService.updateFeatureFlag('enabled', false);
       expect(configService.isFeatureEnabled('enabled')).toBe(false);
     });
@@ -138,7 +140,9 @@ describe('ContextualChatConfigService', () => {
       const validation = configService.validateConfiguration();
 
       expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('extractionTimeout must be between 1000 and 30000 milliseconds');
+      expect(validation.errors).toContain(
+        'extractionTimeout must be between 1000 and 30000 milliseconds'
+      );
     });
 
     it('should generate warnings for suboptimal settings', () => {
@@ -148,7 +152,9 @@ describe('ContextualChatConfigService', () => {
       const validation = configService.validateConfiguration();
 
       expect(validation.isValid).toBe(true);
-      expect(validation.warnings).toContain('contextCacheTTL should be between 60 and 3600 seconds for optimal performance');
+      expect(validation.warnings).toContain(
+        'contextCacheTTL should be between 60 and 3600 seconds for optimal performance'
+      );
     });
 
     it('should validate feature dependencies', () => {
@@ -158,7 +164,9 @@ describe('ContextualChatConfigService', () => {
       const validation = configService.validateConfiguration();
 
       expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('contentExtraction must be enabled when contextual chat is enabled');
+      expect(validation.errors).toContain(
+        'contentExtraction must be enabled when contextual chat is enabled'
+      );
     });
 
     it('should validate contextual prompts dependency', () => {
@@ -168,7 +176,9 @@ describe('ContextualChatConfigService', () => {
       const validation = configService.validateConfiguration();
 
       expect(validation.isValid).toBe(false);
-      expect(validation.errors).toContain('contentExtraction must be enabled when contextualPrompts is enabled');
+      expect(validation.errors).toContain(
+        'contentExtraction must be enabled when contextualPrompts is enabled'
+      );
     });
   });
 

@@ -38,40 +38,46 @@ const llmRequestRoute = {
         content: schema.string(),
         contentType: schema.literal('text'),
         promptPrefix: schema.maybe(schema.string()),
-        images: schema.maybe(schema.arrayOf(schema.object({
-          data: schema.string(), // base64 encoded image data
-          mimeType: schema.string(), // image/png, image/jpeg, etc.
-          filename: schema.maybe(schema.string()),
-        }))),
+        images: schema.maybe(
+          schema.arrayOf(
+            schema.object({
+              data: schema.string(), // base64 encoded image data
+              mimeType: schema.string(), // image/png, image/jpeg, etc.
+              filename: schema.maybe(schema.string()),
+            })
+          )
+        ),
       }),
       // Add UI context for contextual chat
-      uiContext: schema.maybe(schema.object({
-        page: schema.object({
-          url: schema.string(),
-          title: schema.string(),
-          app: schema.string(),
-          route: schema.string(),
-          breadcrumbs: schema.arrayOf(schema.any()),
-          metadata: schema.any(),
-        }),
-        content: schema.arrayOf(schema.any()),
-        navigation: schema.object({
-          currentApp: schema.string(),
-          currentRoute: schema.string(),
-          breadcrumbs: schema.arrayOf(schema.any()),
-          availableApps: schema.arrayOf(schema.any()),
-        }),
-        filters: schema.arrayOf(schema.any()),
-        userActions: schema.arrayOf(schema.any()),
-        permissions: schema.object({
-          canViewData: schema.boolean(),
-          canModifyDashboard: schema.boolean(),
-          canAccessApp: schema.boolean(),
-          restrictedFields: schema.arrayOf(schema.string()),
-          dataSourcePermissions: schema.any(),
-        }),
-        extractedAt: schema.string(),
-      })),
+      uiContext: schema.maybe(
+        schema.object({
+          page: schema.object({
+            url: schema.string(),
+            title: schema.string(),
+            app: schema.string(),
+            route: schema.string(),
+            breadcrumbs: schema.arrayOf(schema.any()),
+            metadata: schema.any(),
+          }),
+          content: schema.arrayOf(schema.any()),
+          navigation: schema.object({
+            currentApp: schema.string(),
+            currentRoute: schema.string(),
+            breadcrumbs: schema.arrayOf(schema.any()),
+            availableApps: schema.arrayOf(schema.any()),
+          }),
+          filters: schema.arrayOf(schema.any()),
+          userActions: schema.arrayOf(schema.any()),
+          permissions: schema.object({
+            canViewData: schema.boolean(),
+            canModifyDashboard: schema.boolean(),
+            canAccessApp: schema.boolean(),
+            restrictedFields: schema.arrayOf(schema.string()),
+            dataSourcePermissions: schema.any(),
+          }),
+          extractedAt: schema.string(),
+        })
+      ),
     }),
     query: schema.object({
       dataSourceId: schema.maybe(schema.string()),
@@ -231,18 +237,24 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
         assistantPluginType: typeof context?.assistant_plugin,
         assistantPluginKeys: context?.assistant_plugin ? Object.keys(context.assistant_plugin) : [],
         loggerExists: !!context?.assistant_plugin?.logger,
-        loggerType: typeof context?.assistant_plugin?.logger
+        loggerType: typeof context?.assistant_plugin?.logger,
       });
 
       if (!context) {
         console.error('❌ CRITICAL: No context provided to chat route');
-        return response.custom({ statusCode: 500, body: 'Internal server error: No request context' });
+        return response.custom({
+          statusCode: 500,
+          body: 'Internal server error: No request context',
+        });
       }
 
       if (!context.assistant_plugin) {
         console.error('❌ CRITICAL: Context missing assistant_plugin at route level');
         console.error('Available context keys:', Object.keys(context));
-        return response.custom({ statusCode: 500, body: 'Internal server error: Missing plugin context' });
+        return response.custom({
+          statusCode: 500,
+          body: 'Internal server error: Missing plugin context',
+        });
       }
 
       const storageService = await createStorageService(context, request.query.dataSourceId);
@@ -263,27 +275,33 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
             hasUIContext: !!uiContext,
             contextElementCount: uiContext?.content?.length || 0,
             hasImages: !!input.images?.length,
-            imageCount: input.images?.length || 0
+            imageCount: input.images?.length || 0,
           });
 
-          outputs = await (chatService as any).requestLLMWithContext({
-            messages,
-            input,
-            conversationId: conversationIdInRequestBody,
-            uiContext
-          }, context);
+          outputs = await (chatService as any).requestLLMWithContext(
+            {
+              messages,
+              input,
+              conversationId: conversationIdInRequestBody,
+              uiContext,
+            },
+            context
+          );
         } else {
           // Use standard chat service
           context.assistant_plugin.logger.debug('Using standard chat service', {
             hasImages: !!input.images?.length,
-            imageCount: input.images?.length || 0
+            imageCount: input.images?.length || 0,
           });
 
-          outputs = await chatService.requestLLM({
-            messages,
-            input,
-            conversationId: conversationIdInRequestBody,
-          }, context);
+          outputs = await chatService.requestLLM(
+            {
+              messages,
+              input,
+              conversationId: conversationIdInRequestBody,
+            },
+            context
+          );
         }
       } catch (error) {
         context.assistant_plugin.logger.error(error);
@@ -332,13 +350,15 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           if (resultPayload.messages.length > 0) {
             const lastMessage = resultPayload.messages[resultPayload.messages.length - 1];
             if (lastMessage.type === 'output') {
-              resultPayload.interactions = [{
-                input: input.content,
-                response: lastMessage.content,
-                conversation_id: conversationId,
-                interaction_id: interactionId,
-                create_time: new Date().toISOString(),
-              }];
+              resultPayload.interactions = [
+                {
+                  input: input.content,
+                  response: lastMessage.content,
+                  conversation_id: conversationId,
+                  interaction_id: interactionId,
+                  create_time: new Date().toISOString(),
+                },
+              ];
             }
           }
         } else {
@@ -533,19 +553,25 @@ export function registerChatRoutes(router: IRouter, routeOptions: RoutesOptions)
           // Extract UI context from request body if available
           const uiContext = (request.body as any).uiContext;
 
-          outputs = await (chatService as any).regenerateWithContext({
-            conversationId,
-            interactionId,
-            rootAgentId: '', // This might need to be extracted from the conversation
-            uiContext
-          }, context);
+          outputs = await (chatService as any).regenerateWithContext(
+            {
+              conversationId,
+              interactionId,
+              rootAgentId: '', // This might need to be extracted from the conversation
+              uiContext,
+            },
+            context
+          );
         } else {
           // Use standard chat service
-          outputs = await chatService.regenerate({
-            conversationId,
-            interactionId,
-            rootAgentId: '' // This might need to be extracted from the conversation
-          }, context);
+          outputs = await chatService.regenerate(
+            {
+              conversationId,
+              interactionId,
+              rootAgentId: '', // This might need to be extracted from the conversation
+            },
+            context
+          );
         }
       } catch (error) {
         context.assistant_plugin.logger.error(error);

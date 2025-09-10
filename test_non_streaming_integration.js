@@ -8,7 +8,7 @@ const http = require('http');
 
 async function testNonStreamingIntegration() {
   console.log('Testing non-streaming chat integration...');
-  
+
   // Test payload that matches the dashboards assistant format
   const payload = {
     conversationId: undefined, // New conversation
@@ -18,16 +18,16 @@ async function testNonStreamingIntegration() {
       context: {
         appId: 'test',
         content: '',
-        datasourceId: undefined
+        datasourceId: undefined,
       },
       content: 'Hello, can you help me understand OpenSearch?',
       contentType: 'text',
-      promptPrefix: undefined
-    }
+      promptPrefix: undefined,
+    },
   };
 
   const postData = JSON.stringify(payload);
-  
+
   const options = {
     hostname: 'localhost',
     port: 5601, // OpenSearch Dashboards port
@@ -36,21 +36,21 @@ async function testNonStreamingIntegration() {
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(postData),
-      'osd-xsrf': 'true' // Required for OpenSearch Dashboards
-    }
+      'osd-xsrf': 'true', // Required for OpenSearch Dashboards
+    },
   };
 
   return new Promise((resolve, reject) => {
     const req = http.request(options, (res) => {
       console.log(`Status: ${res.statusCode}`);
       console.log(`Headers:`, res.headers);
-      
+
       let data = '';
-      
+
       res.on('data', (chunk) => {
         data += chunk;
       });
-      
+
       res.on('end', () => {
         try {
           if (res.statusCode === 200) {
@@ -59,14 +59,14 @@ async function testNonStreamingIntegration() {
             console.log(`Conversation ID: ${response.conversationId}`);
             console.log(`Messages count: ${response.messages?.length || 0}`);
             console.log(`Interactions count: ${response.interactions?.length || 0}`);
-            
+
             if (response.messages && response.messages.length > 0) {
               const lastMessage = response.messages[response.messages.length - 1];
               if (lastMessage.type === 'output') {
                 console.log(`Response preview: ${lastMessage.content.substring(0, 100)}...`);
               }
             }
-            
+
             resolve(response);
           } else {
             console.log(`\n❌ ERROR: ${res.statusCode}`);

@@ -7,7 +7,7 @@ import { ContentElement, ContentType, UIContext } from './ui_context';
 
 /**
  * Content Extraction Pipeline Types
- * 
+ *
  * This file defines interfaces and types for the content extraction pipeline
  * that processes DOM elements and embeddables to extract meaningful data.
  */
@@ -86,7 +86,7 @@ export enum DataExtractionMethod {
   DATA_ATTRIBUTES = 'dataAttributes',
   COMPUTED_STYLE = 'computedStyle',
   EMBEDDABLE_API = 'embeddableApi',
-  CUSTOM_FUNCTION = 'customFunction'
+  CUSTOM_FUNCTION = 'customFunction',
 }
 
 // ============================================================================
@@ -360,21 +360,21 @@ export interface VisualizationMetadata {
 }
 
 // Import required types from other files
-import { 
-  ISpecializedExtractor, 
-  IContentProcessor, 
-  IContentValidator, 
+import {
+  ISpecializedExtractor,
+  IContentProcessor,
+  IContentValidator,
   IContentPrioritizer,
-  IContentExtractor
+  IContentExtractor,
 } from './contextual_chat_service';
 
-import { 
-  ChartData, 
-  PaginationInfo, 
-  SortInfo, 
-  LinkInfo, 
-  FormField, 
-  ValidationInfo, 
-  NavigationItem, 
-  ActionInfo 
+import {
+  ChartData,
+  PaginationInfo,
+  SortInfo,
+  LinkInfo,
+  FormField,
+  ValidationInfo,
+  NavigationItem,
+  ActionInfo,
 } from './ui_context';

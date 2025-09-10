@@ -239,8 +239,8 @@ describe('AssistantPlugin', () => {
       } as unknown) as IRouter;
       mockCoreSetup.http.createRouter.mockReturnValue(mockRouter);
 
-      const assistantServiceStartSpy = jest.spyOn(plugin['assistantService'], 'start');
-      const assistantServiceStopSpy = jest.spyOn(plugin['assistantService'], 'stop');
+      const assistantServiceStartSpy = jest.spyOn(plugin.assistantService, 'start');
+      const assistantServiceStopSpy = jest.spyOn(plugin.assistantService, 'stop');
 
       await plugin.setup(mockCoreSetup);
       plugin.start(mockCoreStart);

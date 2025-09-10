@@ -4,10 +4,14 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { HttpSetup } from '../../../../src/core/public';
-import { StreamingChatService, StreamingChatRequest, StreamingChatResponse } from '../services/streaming_chat_service';
-import { UIContext } from '../../common/types/ui_context';
 import React from 'react';
+import { HttpSetup } from '../../../../src/core/public';
+import {
+  StreamingChatService,
+  StreamingChatRequest,
+  StreamingChatResponse,
+} from '../services/streaming_chat_service';
+import { UIContext } from '../../common/types/ui_context';
 
 export interface UseStreamingChatOptions {
   http: HttpSetup;
@@ -18,7 +22,11 @@ export interface UseStreamingChatOptions {
 }
 
 export interface UseStreamingChatReturn {
-  sendMessage: (message: string, context?: UIContext, images?: Array<{ data: string, mimeType: string, filename?: string }>) => Promise<void>;
+  sendMessage: (
+    message: string,
+    context?: UIContext,
+    images?: Array<{ data: string; mimeType: string; filename?: string }>
+  ) => Promise<void>;
   streamingContent: string;
   isStreaming: boolean;
   error: Error | null;
@@ -52,131 +60,132 @@ export const useStreamingChat = (options: UseStreamingChatOptions): UseStreaming
     };
   }, [http]);
 
-  const sendMessage = useCallback(async (
-    message: string,
-    context?: UIContext,
-    images?: Array<{ data: string, mimeType: string, filename?: string }>
-  ) => {
-    console.log('🚀 HOOK: sendMessage called with:', {
-      messageLength: message.length,
-      hasContext: !!context,
-      hasImages: !!images?.length,
-      hasOnUpdate: !!onUpdate,
-      currentConversationId: conversationIdRef.current,
-      timestamp: new Date().toISOString()
-    });
+  const sendMessage = useCallback(
+    async (
+      message: string,
+      context?: UIContext,
+      images?: Array<{ data: string; mimeType: string; filename?: string }>
+    ) => {
+      console.log('🚀 HOOK: sendMessage called with:', {
+        messageLength: message.length,
+        hasContext: !!context,
+        hasImages: !!images?.length,
+        hasOnUpdate: !!onUpdate,
+        currentConversationId: conversationIdRef.current,
+        timestamp: new Date().toISOString(),
+      });
 
-    if (!streamingServiceRef.current) {
-      console.error('❌ Streaming service not initialized');
-      return;
-    }
+      if (!streamingServiceRef.current) {
+        console.error('❌ Streaming service not initialized');
+        return;
+      }
 
-    console.log('🔄 HOOK: Resetting state...');
-    // Reset state
-    setError(null);
-    setStreamingContent('');
-    setIsStreaming(true);
+      console.log('🔄 HOOK: Resetting state...');
+      // Reset state
+      setError(null);
+      setStreamingContent('');
+      setIsStreaming(true);
 
-    console.log('🔄 HOOK: State reset complete, isStreaming should be true');
+      console.log('🔄 HOOK: State reset complete, isStreaming should be true');
 
-    const request: StreamingChatRequest = {
-      conversationId: conversationIdRef.current,
-      input: {
-        type: 'input',
-        context: {
-          appId: context?.page?.app,
-          content: context ? JSON.stringify(context) : undefined,
+      const request: StreamingChatRequest = {
+        conversationId: conversationIdRef.current,
+        input: {
+          type: 'input',
+          context: {
+            appId: context?.page?.app,
+            content: context ? JSON.stringify(context) : undefined,
+          },
+          content: message,
+          contentType: 'text',
+          images,
         },
-        content: message,
-        contentType: 'text',
-        images: images,
-      },
-      uiContext: context,
-    };
+        uiContext: context,
+      };
 
-    console.log('🚀 Sending streaming message:', {
-      message: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
-      hasContext: !!context,
-      contextElementCount: context?.content?.length || 0,
-      hasImages: !!images?.length,
-      imageCount: images?.length || 0
-    });
+      console.log('🚀 Sending streaming message:', {
+        message: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        hasContext: !!context,
+        contextElementCount: context?.content?.length || 0,
+        hasImages: !!images?.length,
+        imageCount: images?.length || 0,
+      });
 
-    try {
-      await streamingServiceRef.current.sendStreamingMessage(
-        request,
-        // onChunk
-        (chunk: string) => {
+      try {
+        await streamingServiceRef.current.sendStreamingMessage(
+          request,
+          // onChunk
+          (chunk: string) => {
+            setStreamingContent((prev) => {
+              const newContent = prev + chunk;
 
-          setStreamingContent(prev => {
-            const newContent = prev + chunk;
+              // Force a re-render to ensure component sees the update
+              setForceUpdate((prev) => {
+                const newValue = prev + 1;
+                return newValue;
+              });
 
-            // Force a re-render to ensure component sees the update
-            setForceUpdate(prev => {
-              const newValue = prev + 1;
-              return newValue;
-            });
-
-            // Call direct callback to notify component immediately
-            if (onUpdate) {
-              try {
-                onUpdate(newContent, true);
-              } catch (error) {
-                console.error('❌ HOOK: Direct callback failed:', error);
+              // Call direct callback to notify component immediately
+              if (onUpdate) {
+                try {
+                  onUpdate(newContent, true);
+                } catch (error) {
+                  console.error('❌ HOOK: Direct callback failed:', error);
+                }
+              } else {
+                console.warn('⚠️ HOOK: onUpdate callback is not available!');
               }
-            } else {
-              console.warn('⚠️ HOOK: onUpdate callback is not available!');
+
+              return newContent;
+            });
+          },
+          // onComplete
+          (response: StreamingChatResponse) => {
+            setIsStreaming(false);
+
+            // Call direct callback to notify component streaming is complete
+            if (onUpdate) {
+              // Get the current content from state
+              setStreamingContent((currentContent) => {
+                onUpdate(currentContent, false);
+                return currentContent;
+              });
             }
 
-            return newContent;
-          });
-        },
-        // onComplete
-        (response: StreamingChatResponse) => {
+            // Store conversation ID for future messages
+            if (response.conversationId) {
+              conversationIdRef.current = response.conversationId;
+            }
 
-          setIsStreaming(false);
+            // Call completion callback
+            if (onComplete) {
+              onComplete(response);
+            }
+          },
+          // onError
+          (streamError: Error) => {
+            console.error('❌ Streaming error:', streamError);
+            setError(streamError);
+            setIsStreaming(false);
 
-          // Call direct callback to notify component streaming is complete
-          if (onUpdate) {
-            // Get the current content from state
-            setStreamingContent(currentContent => {
-              onUpdate(currentContent, false);
-              return currentContent;
-            });
-          }
+            if (onError) {
+              onError(streamError);
+            }
+          },
+          dataSourceId
+        );
+      } catch (sendError) {
+        console.error('❌ Failed to send streaming message:', sendError);
+        setError(sendError as Error);
+        setIsStreaming(false);
 
-          // Store conversation ID for future messages
-          if (response.conversationId) {
-            conversationIdRef.current = response.conversationId;
-          }
-
-          // Call completion callback
-          if (onComplete) {
-            onComplete(response);
-          }
-        },
-        // onError
-        (streamError: Error) => {
-          console.error('❌ Streaming error:', streamError);
-          setError(streamError);
-          setIsStreaming(false);
-
-          if (onError) {
-            onError(streamError);
-          }
-        },
-        dataSourceId
-      );
-    } catch (sendError) {
-      console.error('❌ Failed to send streaming message:', sendError);
-      setError(sendError as Error);
-      setIsStreaming(false);
-
-      if (onError) {
-        onError(sendError as Error);
+        if (onError) {
+          onError(sendError as Error);
+        }
       }
-    }
-  }, [dataSourceId, onComplete, onError, onUpdate]);
+    },
+    [dataSourceId, onComplete, onError, onUpdate]
+  );
 
   const abortStream = useCallback(() => {
     if (streamingServiceRef.current) {

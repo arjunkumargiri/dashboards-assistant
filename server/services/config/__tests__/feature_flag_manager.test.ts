@@ -39,9 +39,9 @@ describe('FeatureFlagManager', () => {
       const flags = featureFlagManager.getAllFlags();
 
       expect(flags).toHaveLength(8);
-      expect(flags.find(f => f.key === 'contextual_chat_enabled')).toBeDefined();
-      expect(flags.find(f => f.key === 'content_extraction_enabled')).toBeDefined();
-      expect(flags.find(f => f.key === 'admin_interface_enabled')).toBeDefined();
+      expect(flags.find((f) => f.key === 'contextual_chat_enabled')).toBeDefined();
+      expect(flags.find((f) => f.key === 'content_extraction_enabled')).toBeDefined();
+      expect(flags.find((f) => f.key === 'admin_interface_enabled')).toBeDefined();
     });
 
     it('should validate dependencies correctly', () => {
@@ -155,7 +155,10 @@ describe('FeatureFlagManager', () => {
 
       await featureFlagManager.loadOverrides();
 
-      expect(mockLogger.error).toHaveBeenCalledWith('Failed to load feature flag overrides', expect.any(Error));
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to load feature flag overrides',
+        expect.any(Error)
+      );
     });
 
     it('should save overrides to saved objects', async () => {
@@ -182,12 +185,14 @@ describe('FeatureFlagManager', () => {
     it('should handle save errors', async () => {
       mockSavedObjectsClient.create.mockRejectedValue(new Error('Storage error'));
 
-      await expect(featureFlagManager.saveOverride({
-        key: 'contextual_chat_enabled',
-        value: false,
-        reason: 'Testing error',
-        timestamp: Date.now(),
-      })).rejects.toThrow('Storage error');
+      await expect(
+        featureFlagManager.saveOverride({
+          key: 'contextual_chat_enabled',
+          value: false,
+          reason: 'Testing error',
+          timestamp: Date.now(),
+        })
+      ).rejects.toThrow('Storage error');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to save feature flag override for contextual_chat_enabled',
@@ -199,7 +204,9 @@ describe('FeatureFlagManager', () => {
       const managerWithoutClient = new FeatureFlagManager(mockLogger);
 
       await managerWithoutClient.loadOverrides();
-      expect(mockLogger.warn).toHaveBeenCalledWith('SavedObjectsClient not available, skipping override loading');
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'SavedObjectsClient not available, skipping override loading'
+      );
 
       await managerWithoutClient.saveOverride({
         key: 'test',
@@ -207,29 +214,31 @@ describe('FeatureFlagManager', () => {
         reason: 'test',
         timestamp: Date.now(),
       });
-      expect(mockLogger.warn).toHaveBeenCalledWith('SavedObjectsClient not available, cannot save override');
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'SavedObjectsClient not available, cannot save override'
+      );
     });
   });
 
   describe('user ID hashing', () => {
     it('should produce consistent hash for same user ID', () => {
       const userId = 'testuser123';
-      
+
       // Test multiple times to ensure consistency
       const result1 = featureFlagManager.isEnabled('analytics_enabled', userId);
       const result2 = featureFlagManager.isEnabled('analytics_enabled', userId);
-      
+
       expect(result1).toBe(result2);
     });
 
     it('should produce different results for different users', () => {
       const results = new Set();
-      
+
       // Test with many different user IDs
       for (let i = 0; i < 100; i++) {
         results.add(featureFlagManager.isEnabled('analytics_enabled', `user${i}`));
       }
-      
+
       // Should have both true and false results
       expect(results.size).toBe(2);
       expect(results.has(true)).toBe(true);

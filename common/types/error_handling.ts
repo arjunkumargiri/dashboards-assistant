@@ -12,37 +12,37 @@ export enum ContextualChatErrorType {
   CONTEXT_TIMEOUT = 'context_timeout',
   CONTEXT_UNAVAILABLE = 'context_unavailable',
   PARTIAL_CONTEXT_ONLY = 'partial_context_only',
-  
+
   // Permission and security errors
   INSUFFICIENT_PERMISSIONS = 'insufficient_permissions',
   UNAUTHORIZED_CONTENT = 'unauthorized_content',
   SECURITY_VALIDATION_FAILED = 'security_validation_failed',
-  
+
   // Service errors
   CHAT_SERVICE_UNAVAILABLE = 'chat_service_unavailable',
   PROMPT_BUILDER_FAILED = 'prompt_builder_failed',
   RESPONSE_PROCESSOR_FAILED = 'response_processor_failed',
-  
+
   // DOM and UI errors
   DOM_OBSERVER_FAILED = 'dom_observer_failed',
   ELEMENT_NOT_FOUND = 'element_not_found',
   ELEMENT_NOT_ACCESSIBLE = 'element_not_accessible',
-  
+
   // Cache and performance errors
   CACHE_ERROR = 'cache_error',
   EXTRACTION_QUEUE_FULL = 'extraction_queue_full',
   MEMORY_LIMIT_EXCEEDED = 'memory_limit_exceeded',
-  
+
   // Network and connectivity errors
   NETWORK_ERROR = 'network_error',
   SERVICE_TIMEOUT = 'service_timeout',
-  
+
   // Configuration errors
   INVALID_CONFIGURATION = 'invalid_configuration',
   FEATURE_DISABLED = 'feature_disabled',
-  
+
   // Unknown errors
-  UNKNOWN_ERROR = 'unknown_error'
+  UNKNOWN_ERROR = 'unknown_error',
 }
 
 /**
@@ -52,7 +52,7 @@ export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 /**
@@ -65,7 +65,7 @@ export enum RecoveryStrategy {
   SKIP_CONTEXT = 'skip_context',
   NOTIFY_USER = 'notify_user',
   LOG_AND_CONTINUE = 'log_and_continue',
-  FAIL_GRACEFULLY = 'fail_gracefully'
+  FAIL_GRACEFULLY = 'fail_gracefully',
 }
 
 /**
@@ -136,14 +136,14 @@ export interface IErrorHandler {
     error: Error | ContextualChatError,
     context?: any
   ): Promise<ErrorRecoveryResult<T>>;
-  
+
   createContextualError(
     type: ContextualChatErrorType,
     message: string,
     originalError?: Error,
     context?: any
   ): ContextualChatError;
-  
+
   shouldRetry(error: ContextualChatError): boolean;
   getRecoveryStrategy(error: ContextualChatError): RecoveryStrategy;
   notifyUser(notification: ContextIssueNotification): void;
@@ -153,22 +153,16 @@ export interface IErrorHandler {
  * Graceful degradation interface
  */
 export interface IGracefulDegradation {
-  fallbackToStandardChat<T>(
-    originalRequest: any,
-    error: ContextualChatError
-  ): Promise<T>;
-  
+  fallbackToStandardChat<T>(originalRequest: any, error: ContextualChatError): Promise<T>;
+
   usePartialContext<T>(
     partialContext: any,
     originalRequest: any,
     error: ContextualChatError
   ): Promise<T>;
-  
-  skipContextEntirely<T>(
-    originalRequest: any,
-    error: ContextualChatError
-  ): Promise<T>;
-  
+
+  skipContextEntirely<T>(originalRequest: any, error: ContextualChatError): Promise<T>;
+
   isPartialContextUsable(partialContext: any): boolean;
   getMinimalContext(): any;
 }

@@ -24,14 +24,16 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    * Override getConversation to return minimal conversation data
    * since OpenSearch-Agents manages conversations internally
    */
-  async getConversation(conversationId: string): Promise<{
+  async getConversation(
+    conversationId: string
+  ): Promise<{
     id: string;
     title: string;
     messages: IMessage[];
     interactions: IInteraction[];
   }> {
     this.logger.debug('OpenSearch-Agents mode: returning minimal conversation data');
-    
+
     return {
       id: conversationId,
       title: 'OpenSearch-Agents Conversation',
@@ -46,7 +48,7 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    */
   async getConversations(options: any): Promise<{ objects: any[]; total: number }> {
     this.logger.debug('OpenSearch-Agents mode: conversation history disabled');
-    
+
     return {
       objects: [],
       total: 0,
@@ -58,7 +60,7 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    */
   async getInteraction(conversationId: string, interactionId: string): Promise<IInteraction> {
     this.logger.debug('OpenSearch-Agents mode: returning minimal interaction data');
-    
+
     return {
       conversation_id: conversationId,
       interaction_id: interactionId,
@@ -76,7 +78,7 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    */
   async deleteConversation(conversationId: string): Promise<{ success: boolean }> {
     this.logger.debug('OpenSearch-Agents mode: conversation deletion not supported');
-    
+
     return { success: true };
   }
 
@@ -86,7 +88,7 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    */
   async updateConversation(conversationId: string, title: string): Promise<{ success: boolean }> {
     this.logger.debug('OpenSearch-Agents mode: conversation updates not supported');
-    
+
     return { success: true };
   }
 
@@ -96,7 +98,7 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    */
   async getTraces(interactionId: string): Promise<any[]> {
     this.logger.debug('OpenSearch-Agents mode: traces not available');
-    
+
     return [];
   }
 
@@ -105,12 +107,12 @@ export class OpenSearchAgentsStorageService extends AgentFrameworkStorageService
    */
   async updateInteraction(interactionId: string, updateBody: any): Promise<{ success: boolean }> {
     this.logger.debug('OpenSearch-Agents mode: interaction feedback logged but not persisted');
-    
+
     // Log feedback for monitoring purposes but don't persist to OpenSearch
     if (updateBody.feedback) {
       this.logger.info(`Feedback received for interaction ${interactionId}:`, updateBody.feedback);
     }
-    
+
     return { success: true };
   }
 }

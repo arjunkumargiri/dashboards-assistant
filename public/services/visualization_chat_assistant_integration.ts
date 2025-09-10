@@ -17,11 +17,9 @@ export interface VisualizationChatAssistantIntegration {
   openChatWithVisualization: (conversationId?: string) => void;
 }
 
-export class VisualizationChatAssistantIntegrationService implements VisualizationChatAssistantIntegration {
-  constructor(
-    private core: CoreStart,
-    private assistantActions: AssistantActions
-  ) {}
+export class VisualizationChatAssistantIntegrationService
+  implements VisualizationChatAssistantIntegration {
+  constructor(private core: CoreStart, private assistantActions: AssistantActions) {}
 
   /**
    * Send a visualization message to the AI assistant
@@ -50,11 +48,13 @@ export class VisualizationChatAssistantIntegrationService implements Visualizati
             timestamp: context.timestamp,
           },
         },
-        images: [{
-          data: imageData,
-          mimeType: 'image/png',
-          filename: this.generateImageFilename(context),
-        }],
+        images: [
+          {
+            data: imageData,
+            mimeType: 'image/png',
+            filename: this.generateImageFilename(context),
+          },
+        ],
       };
 
       // Use the existing assistant actions to send the message
@@ -64,7 +64,6 @@ export class VisualizationChatAssistantIntegrationService implements Visualizati
       } else {
         throw new Error('Assistant send action not available');
       }
-
     } catch (error) {
       console.error('Failed to send visualization message:', error);
       throw new Error(`Failed to send visualization to AI: ${error.message}`);
@@ -93,12 +92,12 @@ export class VisualizationChatAssistantIntegrationService implements Visualizati
    * Build a comprehensive prompt for visualization analysis
    */
   private buildVisualizationPrompt(userMessage: string, context: VisualizationChatContext): string {
-    const dashboardContext = context.dashboardTitle 
-      ? ` from the dashboard "${context.dashboardTitle}"` 
+    const dashboardContext = context.dashboardTitle
+      ? ` from the dashboard "${context.dashboardTitle}"`
       : '';
-    
+
     const timestamp = new Date(context.timestamp).toLocaleString();
-    
+
     return `I'm analyzing a visualization titled "${context.visualizationTitle}"${dashboardContext}. I've attached an image of this visualization captured at ${timestamp}.
 
 **User Question:** ${userMessage}
@@ -147,9 +146,9 @@ Please provide specific, actionable insights based on what you can observe in th
       .replace(/[^a-zA-Z0-9\s]/g, '')
       .replace(/\s+/g, '_')
       .toLowerCase();
-    
+
     const timestamp = new Date(context.timestamp).toISOString().slice(0, 19).replace(/:/g, '-');
-    
+
     return `visualization_${sanitizedTitle}_${timestamp}.png`;
   }
 
@@ -159,7 +158,9 @@ Please provide specific, actionable insights based on what you can observe in th
   private fallbackOpenChat(): void {
     try {
       // Method 1: Try to find the chat header button
-      const chatButton = document.querySelector('[data-test-subj="chat-header-button"]') as HTMLElement;
+      const chatButton = document.querySelector(
+        '[data-test-subj="chat-header-button"]'
+      ) as HTMLElement;
       if (chatButton) {
         chatButton.click();
         console.log('✅ Opened chat via header button');
@@ -167,7 +168,9 @@ Please provide specific, actionable insights based on what you can observe in th
       }
 
       // Method 2: Try to find any chat-related button
-      const chatButtons = document.querySelectorAll('button[title*="chat" i], button[aria-label*="chat" i]');
+      const chatButtons = document.querySelectorAll(
+        'button[title*="chat" i], button[aria-label*="chat" i]'
+      );
       if (chatButtons.length > 0) {
         (chatButtons[0] as HTMLElement).click();
         console.log('✅ Opened chat via fallback button');
@@ -180,14 +183,14 @@ Please provide specific, actionable insights based on what you can observe in th
       });
       document.dispatchEvent(chatOpenEvent);
       console.log('✅ Dispatched chat open event');
-
     } catch (error) {
       console.warn('All fallback methods failed to open chat:', error);
-      
+
       // Show user notification to manually open chat
       this.core.notifications.toasts.addInfo({
         title: 'Visualization Analysis Sent',
-        text: 'Your visualization has been sent to AI for analysis. Please open the chat interface to see the results.',
+        text:
+          'Your visualization has been sent to AI for analysis. Please open the chat interface to see the results.',
         toastLifeTimeMs: 5000,
       });
     }
@@ -198,7 +201,7 @@ Please provide specific, actionable insights based on what you can observe in th
    */
   async createVisualizationConversation(context: VisualizationChatContext): Promise<string> {
     const conversationId = `viz-${context.embeddableId}-${context.timestamp}`;
-    
+
     try {
       // If there's a loadChat method, use it to initialize the conversation
       if (this.assistantActions.loadChat) {
@@ -209,7 +212,7 @@ Please provide specific, actionable insights based on what you can observe in th
         );
         console.log('✅ Visualization conversation created');
       }
-      
+
       return conversationId;
     } catch (error) {
       console.warn('Could not create specific conversation, using default:', error);
@@ -233,10 +236,10 @@ Please provide specific, actionable insights based on what you can observe in th
    */
   getAssistantCapabilities(): Record<string, boolean> {
     return {
-      send: !!(this.assistantActions?.send),
-      loadChat: !!(this.assistantActions?.loadChat),
-      resetChat: !!(this.assistantActions?.resetChat),
-      openChatUI: !!(this.assistantActions?.openChatUI),
+      send: !!this.assistantActions?.send,
+      loadChat: !!this.assistantActions?.loadChat,
+      resetChat: !!this.assistantActions?.resetChat,
+      openChatUI: !!this.assistantActions?.openChatUI,
     };
   }
 }

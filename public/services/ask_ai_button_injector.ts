@@ -81,14 +81,16 @@ export class AskAIButtonInjector {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as HTMLElement;
-            
+
             // Check if the added node is a panel heading
             if (element.matches('[data-test-subj="embeddablePanelHeading"]')) {
               this.injectButtonIntoPanel(element);
             }
-            
+
             // Check if the added node contains panel headings
-            const panelHeadings = element.querySelectorAll('[data-test-subj="embeddablePanelHeading"]');
+            const panelHeadings = element.querySelectorAll(
+              '[data-test-subj="embeddablePanelHeading"]'
+            );
             panelHeadings.forEach((panel) => {
               this.injectButtonIntoPanel(panel as HTMLElement);
             });
@@ -132,7 +134,9 @@ export class AskAIButtonInjector {
       }
 
       // Find the options menu button to place our button next to it
-      const optionsMenuButton = panelElement.querySelector('[data-test-subj="embeddablePanelToggleMenuIcon"]');
+      const optionsMenuButton = panelElement.querySelector(
+        '[data-test-subj="embeddablePanelToggleMenuIcon"]'
+      );
       if (!optionsMenuButton || !optionsMenuButton.parentElement) {
         return;
       }
@@ -141,7 +145,7 @@ export class AskAIButtonInjector {
       const buttonContainer = document.createElement('div');
       buttonContainer.className = 'embPanel__askAIButtonContainer';
       buttonContainer.setAttribute('data-embeddable-id', embeddableId);
-      
+
       // Insert before the options menu button
       optionsMenuButton.parentElement.insertBefore(buttonContainer, optionsMenuButton);
 
@@ -188,12 +192,15 @@ export class AskAIButtonInjector {
   /**
    * Get embeddable instance from ID
    */
-  private getEmbeddableInstance(embeddableId: string, panelElement: HTMLElement): IEmbeddable | null {
+  private getEmbeddableInstance(
+    embeddableId: string,
+    panelElement: HTMLElement
+  ): IEmbeddable | null {
     try {
       // Try to get embeddable from the global registry or container
       // This is a simplified approach - in practice, you might need to access
       // the dashboard container or embeddable registry
-      
+
       // Look for embeddable data in the DOM
       const embeddableElement = document.querySelector(`[data-embeddable-id="${embeddableId}"]`);
       if (embeddableElement && (embeddableElement as any).__embeddable) {
@@ -266,7 +273,7 @@ export class AskAIButtonInjector {
       );
     } catch (error) {
       console.error('❌ Failed to handle Ask AI click:', error);
-      
+
       this.core.notifications.toasts.addError(error as Error, {
         title: 'Failed to start Ask AI',
       });
@@ -282,7 +289,7 @@ export class AskAIButtonInjector {
       ReactDOM.unmountComponentAtNode(container);
       container.remove();
     });
-    
+
     this.injectedButtons.clear();
   }
 }

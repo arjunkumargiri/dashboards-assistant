@@ -7,7 +7,7 @@ const http = require('http');
 
 async function testContextFlow() {
   console.log('🧪 Testing context flow through chat system...');
-  
+
   const payload = {
     conversationId: undefined,
     messages: [],
@@ -16,15 +16,15 @@ async function testContextFlow() {
       context: {
         appId: 'test',
         content: '',
-        datasourceId: undefined
+        datasourceId: undefined,
       },
       content: 'Test context flow',
-      contentType: 'text'
-    }
+      contentType: 'text',
+    },
   };
 
   const postData = JSON.stringify(payload);
-  
+
   const options = {
     hostname: 'localhost',
     port: 5601,
@@ -33,22 +33,22 @@ async function testContextFlow() {
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(postData),
-      'osd-xsrf': 'true'
-    }
+      'osd-xsrf': 'true',
+    },
   };
 
   return new Promise((resolve, reject) => {
     console.log('📡 Sending request to test context flow...');
-    
+
     const req = http.request(options, (res) => {
       console.log(`📊 Response Status: ${res.statusCode}`);
-      
+
       let data = '';
-      
+
       res.on('data', (chunk) => {
         data += chunk;
       });
-      
+
       res.on('end', () => {
         try {
           if (res.statusCode === 200) {
@@ -84,7 +84,9 @@ if (require.main === module) {
   testContextFlow()
     .then(() => {
       console.log('\n🎉 Context flow test completed!');
-      console.log('📝 Check the OpenSearch Dashboards server logs for detailed context debugging info');
+      console.log(
+        '📝 Check the OpenSearch Dashboards server logs for detailed context debugging info'
+      );
       process.exit(0);
     })
     .catch((error) => {

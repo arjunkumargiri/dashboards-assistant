@@ -7,7 +7,7 @@ import { SavedObjectsType } from '../../../../src/core/server';
 
 /**
  * Contextual Chat Saved Object Types - Snapshot-based approach
- * 
+ *
  * Note: With the snapshot-based approach, we don't need persistent
  * contextual chat saved objects since context is extracted on-demand.
  * This file provides an empty array to maintain compatibility.

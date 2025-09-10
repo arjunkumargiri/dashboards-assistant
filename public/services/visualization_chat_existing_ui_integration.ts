@@ -21,8 +21,8 @@ export class VisualizationChatExistingUIIntegration {
   private assistantActions?: AssistantActions;
 
   constructor(
-    core: CoreStart, 
-    uiActions: UiActionsStart, 
+    core: CoreStart,
+    uiActions: UiActionsStart,
     embeddable: EmbeddableStart,
     assistantActions?: AssistantActions
   ) {
@@ -56,7 +56,11 @@ export class VisualizationChatExistingUIIntegration {
   /**
    * Handle opening chat with visualization context using existing UI
    */
-  private async handleChatOpen(imageData: string, visualizationTitle: string, embeddableId: string): Promise<void> {
+  private async handleChatOpen(
+    imageData: string,
+    visualizationTitle: string,
+    embeddableId: string
+  ): Promise<void> {
     try {
       console.log('🎯 Opening existing chat UI for visualization:', visualizationTitle);
 
@@ -75,7 +79,7 @@ export class VisualizationChatExistingUIIntegration {
       console.log('✅ Visualization screenshot attached to chat UI successfully');
     } catch (error) {
       console.error('❌ Failed to integrate with existing chat UI:', error);
-      
+
       this.core.notifications.toasts.addError(error as Error, {
         title: 'Failed to open visualization chat',
       });
@@ -92,10 +96,10 @@ export class VisualizationChatExistingUIIntegration {
       '[data-test-subj="chat-flyout"]',
       '.euiFlyout',
       '.chat-container',
-      '.assistant-chat'
+      '.assistant-chat',
     ];
 
-    return chatSelectors.some(selector => document.querySelector(selector) !== null);
+    return chatSelectors.some((selector) => document.querySelector(selector) !== null);
   }
 
   /**
@@ -103,9 +107,11 @@ export class VisualizationChatExistingUIIntegration {
    */
   private async openExistingChatUI(): Promise<void> {
     // Try multiple methods to open the chat UI
-    
+
     // Method 1: Click the chat header button
-    const chatButton = document.querySelector('[aria-label="toggle chat flyout icon"]') as HTMLButtonElement;
+    const chatButton = document.querySelector(
+      '[aria-label="toggle chat flyout icon"]'
+    ) as HTMLButtonElement;
     if (chatButton) {
       chatButton.click();
       console.log('✅ Opened chat via header button');
@@ -117,7 +123,7 @@ export class VisualizationChatExistingUIIntegration {
       '[data-test-subj="chat-header-button"]',
       '.chat-toggle-button',
       '[aria-label*="chat"]',
-      '[title*="chat"]'
+      '[title*="chat"]',
     ];
 
     for (const selector of altChatButtons) {
@@ -139,7 +145,7 @@ export class VisualizationChatExistingUIIntegration {
     // Method 4: Dispatch custom event
     const openChatEvent = new CustomEvent('openAssistantChat', {
       bubbles: true,
-      detail: { source: 'visualization-chat' }
+      detail: { source: 'visualization-chat' },
     });
     document.dispatchEvent(openChatEvent);
     console.log('✅ Dispatched open chat event');
@@ -152,12 +158,12 @@ export class VisualizationChatExistingUIIntegration {
    */
   private async waitForChatUI(maxWait: number = 5000): Promise<void> {
     const startTime = Date.now();
-    
+
     while (Date.now() - startTime < maxWait) {
       if (this.isChatUIOpen()) {
         // Wait a bit more for the UI to fully initialize
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         // Check if chat input is available
         const chatInput = this.findChatInput();
         if (chatInput) {
@@ -165,9 +171,9 @@ export class VisualizationChatExistingUIIntegration {
           return;
         }
       }
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
+
     throw new Error('Chat UI did not become ready within expected time');
   }
 
@@ -186,7 +192,7 @@ export class VisualizationChatExistingUIIntegration {
       'input[placeholder*="message"]',
       '[data-test-subj="chat-input"]',
       '.chat-input textarea',
-      '.chat-input input'
+      '.chat-input input',
     ];
 
     for (const selector of inputSelectors) {
@@ -211,7 +217,7 @@ export class VisualizationChatExistingUIIntegration {
       'button[title*="send"]',
       '[data-test-subj="chat-send-button"]',
       '.chat-send-button',
-      'button:contains("Send")'
+      'button:contains("Send")',
     ];
 
     for (const selector of sendSelectors) {
@@ -228,19 +234,19 @@ export class VisualizationChatExistingUIIntegration {
    * Attach visualization screenshot to the existing chat input
    */
   private async attachVisualizationToChat(
-    imageData: string, 
-    visualizationTitle: string, 
+    imageData: string,
+    visualizationTitle: string,
     embeddableId: string
   ): Promise<void> {
     try {
       // Store the image data globally so the chat system can access it
       this.storeVisualizationData(imageData, visualizationTitle, embeddableId);
-      
+
       // Add visual indicator to chat input
       this.addImagePreviewToChat(imageData, visualizationTitle);
-      
+
       // No notification needed - the visual preview is sufficient feedback
-      
+
       console.log('✅ Visualization data attached to chat successfully');
     } catch (error) {
       console.error('❌ Failed to attach visualization to chat:', error);
@@ -248,12 +254,14 @@ export class VisualizationChatExistingUIIntegration {
     }
   }
 
-
-
   /**
    * Store visualization data globally for chat system to access
    */
-  private storeVisualizationData(imageData: string, visualizationTitle: string, embeddableId: string): void {
+  private storeVisualizationData(
+    imageData: string,
+    visualizationTitle: string,
+    embeddableId: string
+  ): void {
     // Store in window object for global access
     (window as any).__pendingVisualizationData = {
       imageData,
@@ -261,9 +269,9 @@ export class VisualizationChatExistingUIIntegration {
       embeddableId,
       timestamp: Date.now(),
       mimeType: 'image/png',
-      filename: `${visualizationTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`
+      filename: `${visualizationTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`,
     };
-    
+
     console.log('📦 Stored visualization data globally');
   }
 
@@ -273,7 +281,9 @@ export class VisualizationChatExistingUIIntegration {
   private addImagePreviewToChat(imageData: string, visualizationTitle: string): void {
     try {
       // Find the chat input container
-      const chatContainer = document.querySelector('.chat-input-container, .euiFlyout, .chatbot-sidecar');
+      const chatContainer = document.querySelector(
+        '.chat-input-container, .euiFlyout, .chatbot-sidecar'
+      );
       if (!chatContainer) {
         console.warn('⚠️ Could not find chat container for image preview');
         return;
@@ -302,13 +312,13 @@ export class VisualizationChatExistingUIIntegration {
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         transition: all 0.2s ease;
       `;
-      
+
       // Add hover effect
       previewContainer.addEventListener('mouseenter', () => {
         previewContainer.style.background = '#f1f3f4';
         previewContainer.style.borderColor = '#d1d5db';
       });
-      
+
       previewContainer.addEventListener('mouseleave', () => {
         previewContainer.style.background = '#f8f9fa';
         previewContainer.style.borderColor = '#e1e5e9';
@@ -317,7 +327,9 @@ export class VisualizationChatExistingUIIntegration {
       // Create thumbnail
       const thumbnail = document.createElement('img');
       // Ensure the image data has the proper data URL format
-      const imageSrc = imageData.startsWith('data:') ? imageData : `data:image/png;base64,${imageData}`;
+      const imageSrc = imageData.startsWith('data:')
+        ? imageData
+        : `data:image/png;base64,${imageData}`;
       thumbnail.src = imageSrc;
       thumbnail.style.cssText = `
         width: 44px;
@@ -329,7 +341,7 @@ export class VisualizationChatExistingUIIntegration {
         flex-shrink: 0;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
       `;
-      
+
       // Add error handling for broken images
       thumbnail.onerror = () => {
         // Replace with a chart icon if image fails to load
@@ -376,18 +388,18 @@ export class VisualizationChatExistingUIIntegration {
         flex-shrink: 0;
       `;
       removeButton.title = 'Remove attachment';
-      
+
       // Add hover effects
       removeButton.addEventListener('mouseenter', () => {
         removeButton.style.background = '#f3f4f6';
         removeButton.style.color = '#ef4444';
       });
-      
+
       removeButton.addEventListener('mouseleave', () => {
         removeButton.style.background = 'none';
         removeButton.style.color = '#9ca3af';
       });
-      
+
       removeButton.onclick = () => {
         previewContainer.remove();
         delete (window as any).__pendingVisualizationData;
@@ -421,9 +433,9 @@ export class VisualizationChatExistingUIIntegration {
   public stop(): void {
     // Clean up any stored visualization data
     delete (window as any).__pendingVisualizationData;
-    
+
     // Remove any image previews
     const previews = document.querySelectorAll('.visualization-image-preview');
-    previews.forEach(preview => preview.remove());
+    previews.forEach((preview) => preview.remove());
   }
 }

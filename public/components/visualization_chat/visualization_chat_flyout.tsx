@@ -25,7 +25,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { VisualizationChatContext, VisualizationChatService } from '../../services/visualization_chat_service';
+import {
+  VisualizationChatContext,
+  VisualizationChatService,
+} from '../../services/visualization_chat_service';
 import { CoreStart } from '../../../../../src/core/public';
 
 interface VisualizationChatFlyoutProps {
@@ -46,12 +49,14 @@ export const VisualizationChatFlyout: React.FC<VisualizationChatFlyoutProps> = (
   const [userQuery, setUserQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
-  
+
   const visualizationChatService = new VisualizationChatService(core);
 
   useEffect(() => {
     if (isOpen && context) {
-      const suggestions = visualizationChatService.generateSuggestedQuestions(context.visualizationTitle);
+      const suggestions = visualizationChatService.generateSuggestedQuestions(
+        context.visualizationTitle
+      );
       setSuggestedQuestions(suggestions);
     }
   }, [isOpen, context, visualizationChatService]);
@@ -83,7 +88,7 @@ export const VisualizationChatFlyout: React.FC<VisualizationChatFlyoutProps> = (
 
       // Start the chat with the user query and image
       await onStartChat(userQuery, context.imageData);
-      
+
       // Close the flyout after successful submission
       onClose();
 
@@ -93,11 +98,11 @@ export const VisualizationChatFlyout: React.FC<VisualizationChatFlyoutProps> = (
           defaultMessage: 'Visualization analysis started',
         }),
         text: i18n.translate('dashboardAssistant.visualizationChat.chatStartedText', {
-          defaultMessage: 'AI is analyzing your visualization. Check the chat interface for insights.',
+          defaultMessage:
+            'AI is analyzing your visualization. Check the chat interface for insights.',
         }),
         toastLifeTimeMs: 4000,
       });
-
     } catch (error) {
       console.error('Failed to start chat:', error);
       core.notifications.toasts.addError(error as Error, {
@@ -114,12 +119,15 @@ export const VisualizationChatFlyout: React.FC<VisualizationChatFlyoutProps> = (
     setUserQuery(question);
   }, []);
 
-  const handleKeyPress = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleStartChat();
-    }
-  }, [handleStartChat]);
+  const handleKeyPress = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleStartChat();
+      }
+    },
+    [handleStartChat]
+  );
 
   if (!isOpen) {
     return null;
@@ -222,7 +230,8 @@ export const VisualizationChatFlyout: React.FC<VisualizationChatFlyoutProps> = (
         >
           <EuiText size="s">
             {i18n.translate('dashboardAssistant.visualizationChat.tipText', {
-              defaultMessage: 'The AI can analyze the visual patterns, trends, and data shown in your visualization. Be specific about what insights you\'re looking for.',
+              defaultMessage:
+                "The AI can analyze the visual patterns, trends, and data shown in your visualization. Be specific about what insights you're looking for.",
             })}
           </EuiText>
         </EuiCallOut>

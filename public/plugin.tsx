@@ -78,7 +78,6 @@ import { initializeContextualChatPublicServices } from './services/contextual_ch
 import { VisualizationChatExistingUIIntegration } from './services/visualization_chat_existing_ui_integration';
 import { SimpleButtonInjector } from './services/simple_button_injector';
 
-
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 // @ts-ignore
@@ -478,7 +477,7 @@ export class AssistantPlugin
           this.assistantActions
         );
         this.visualizationChatService.setup();
-        
+
         // Standalone button injector disabled - using dropdown menu instead
         // setTimeout(() => {
         //   try {
@@ -494,8 +493,10 @@ export class AssistantPlugin
         //     console.error('Failed to initialize simple Ask AI button injector:', error);
         //   }
         // }, 1000); // Small delay to ensure UI is ready
-        
-        console.log('✅ Visualization chat integration with dropdown menu initialized successfully');
+
+        console.log(
+          '✅ Visualization chat integration with dropdown menu initialized successfully'
+        );
       } catch (error) {
         console.error('Failed to initialize visualization chat integration:', error);
         // Continue with plugin initialization

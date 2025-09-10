@@ -5,7 +5,7 @@
 
 /**
  * Constants for Contextual Chat Feature
- * 
+ *
  * This file defines constants used throughout the contextual chat system.
  */
 
@@ -65,25 +65,25 @@ export const DOM_SELECTORS = {
   EMBEDDABLE_PANEL: '[data-test-subj="embeddablePanelHeading-"]',
   VISUALIZATION: '.visualization',
   CHART_CONTAINER: '.chart-container',
-  
+
   // Data table selectors
   DATA_TABLE: '[data-test-subj="paginated-table-body"]',
   TABLE_HEADER: 'thead th',
   TABLE_ROW: 'tbody tr',
-  
+
   // Text content selectors
   MARKDOWN_PANEL: '.markdown-panel',
   TEXT_PANEL: '.text-panel',
-  
+
   // Control and filter selectors
   FILTER_BAR: '[data-test-subj="globalFilterBar"]',
   TIME_PICKER: '[data-test-subj="superDatePickerToggleQuickMenuButton"]',
   CONTROL_PANEL: '.control-panel',
-  
+
   // Navigation selectors
   BREADCRUMBS: '[data-test-subj="breadcrumbs"]',
   NAV_MENU: '[data-test-subj="navDrawer"]',
-  
+
   // Generic content selectors
   LOADING_SPINNER: '.loading-spinner',
   ERROR_MESSAGE: '.error-message',
@@ -144,18 +144,8 @@ export const PERFORMANCE_THRESHOLDS = {
 // ============================================================================
 
 export const SECURITY_CONSTANTS = {
-  SENSITIVE_ATTRIBUTES: [
-    'data-password',
-    'data-secret',
-    'data-token',
-    'data-key',
-  ],
-  RESTRICTED_SELECTORS: [
-    '[data-sensitive]',
-    '.sensitive-data',
-    '.password-field',
-    '.token-field',
-  ],
+  SENSITIVE_ATTRIBUTES: ['data-password', 'data-secret', 'data-token', 'data-key'],
+  RESTRICTED_SELECTORS: ['[data-sensitive]', '.sensitive-data', '.password-field', '.token-field'],
   AUDIT_EVENTS: {
     CONTEXT_ACCESSED: 'context_accessed',
     CONTENT_EXTRACTED: 'content_extracted',

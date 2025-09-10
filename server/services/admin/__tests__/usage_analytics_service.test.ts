@@ -53,27 +53,16 @@ describe('UsageAnalyticsService', () => {
     });
 
     it('should track chat interaction events', () => {
-      analyticsService.trackChatInteraction(
-        'user1',
-        'session1',
-        2000,
-        true,
-        'contextual',
-        5
-      );
+      analyticsService.trackChatInteraction('user1', 'session1', 2000, true, 'contextual', 5);
 
       // Event should be buffered
       expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
     });
 
     it('should track feature usage events', () => {
-      analyticsService.trackFeatureUsage(
-        'user1',
-        'session1',
-        'contextual_prompts',
-        'enable',
-        { source: 'admin_panel' }
-      );
+      analyticsService.trackFeatureUsage('user1', 'session1', 'contextual_prompts', 'enable', {
+        source: 'admin_panel',
+      });
 
       // Event should be buffered
       expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
@@ -94,14 +83,9 @@ describe('UsageAnalyticsService', () => {
     });
 
     it('should track performance events', () => {
-      analyticsService.trackPerformance(
-        'user1',
-        'session1',
-        'extraction_time',
-        1200,
-        'ms',
-        { contentTypes: ['visualization'] }
-      );
+      analyticsService.trackPerformance('user1', 'session1', 'extraction_time', 1200, 'ms', {
+        contentTypes: ['visualization'],
+      });
 
       // Event should be buffered
       expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
@@ -240,8 +224,9 @@ describe('UsageAnalyticsService', () => {
     it('should handle report generation errors', async () => {
       mockSavedObjectsClient.find.mockRejectedValue(new Error('Database error'));
 
-      await expect(analyticsService.generateReport(0, Date.now()))
-        .rejects.toThrow('Database error');
+      await expect(analyticsService.generateReport(0, Date.now())).rejects.toThrow(
+        'Database error'
+      );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to generate analytics report',
@@ -308,15 +293,17 @@ describe('UsageAnalyticsService', () => {
     });
 
     it('should handle unknown metrics', async () => {
-      await expect(analyticsService.getTrendData('unknown_metric', 'day', 7))
-        .rejects.toThrow('Unknown metric: unknown_metric');
+      await expect(analyticsService.getTrendData('unknown_metric', 'day', 7)).rejects.toThrow(
+        'Unknown metric: unknown_metric'
+      );
     });
 
     it('should handle trend data errors', async () => {
       mockSavedObjectsClient.find.mockRejectedValue(new Error('Database error'));
 
-      await expect(analyticsService.getTrendData('context_extractions', 'day', 7))
-        .rejects.toThrow('Database error');
+      await expect(analyticsService.getTrendData('context_extractions', 'day', 7)).rejects.toThrow(
+        'Database error'
+      );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to get trend data for context_extractions',

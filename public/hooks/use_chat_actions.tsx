@@ -80,7 +80,7 @@ export const useChatActions = (): AssistantActions => {
         inputType: typeof input,
         hasContent: !!input?.content,
         contentLength: input?.content?.length || 0,
-        content: input?.content
+        content: input?.content,
       });
       throw new Error('Input message content is required and cannot be empty');
     }
@@ -91,7 +91,7 @@ export const useChatActions = (): AssistantActions => {
       contentPreview: input.content.substring(0, 50) + (input.content.length > 50 ? '...' : ''),
       hasImages: !!input.images?.length,
       imageCount: input.images?.length || 0,
-      hasUIContext: !!uiContext
+      hasUIContext: !!uiContext,
     });
 
     const abortController = new AbortController();
@@ -110,7 +110,7 @@ export const useChatActions = (): AssistantActions => {
         hasUIContext: !!uiContext,
         uiContextType: typeof uiContext,
         uiContextKeys: uiContext ? Object.keys(uiContext) : [],
-        contentCount: uiContext?.content?.length || 0
+        contentCount: uiContext?.content?.length || 0,
       });
 
       // Include UI context if provided
@@ -121,13 +121,13 @@ export const useChatActions = (): AssistantActions => {
           // hasTimeRange removed - no longer used
           hasFilters: !!uiContext.filters?.length,
           pageApp: uiContext.page?.app,
-          extractedAt: uiContext.extractedAt
+          extractedAt: uiContext.extractedAt,
         });
       } else {
         console.log('❌ No UI context to include in request');
         // Don't include uiContext key at all if it's falsy
       }
-      
+
       console.log('📤 Final request body keys:', Object.keys(requestBody));
 
       const fetchResponse = await core.services.http.post(ASSISTANT_API.SEND_MESSAGE, {

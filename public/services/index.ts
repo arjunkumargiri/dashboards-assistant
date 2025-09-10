@@ -17,10 +17,10 @@ import chatIcon from '../assets/chat.svg';
 export * from './incontext_insight';
 export { ConversationLoadService } from './conversation_load_service';
 export { ConversationsService } from './conversations_service';
-export { 
+export {
   FrontendContextualChatServiceRegistry,
   getFrontendContextualChatServiceRegistry,
-  resetFrontendContextualChatServiceRegistry
+  resetFrontendContextualChatServiceRegistry,
 } from './contextual_chat_service_registry';
 
 export const [getIncontextInsightRegistry, setIncontextInsightRegistry] = createGetterSetter<

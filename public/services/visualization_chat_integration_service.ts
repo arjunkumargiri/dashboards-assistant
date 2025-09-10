@@ -8,7 +8,10 @@ import { CoreStart } from '../../../../src/core/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
-import { VisualizationChatAction, VISUALIZATION_CHAT_ACTION } from '../actions/visualization_chat_action';
+import {
+  VisualizationChatAction,
+  VISUALIZATION_CHAT_ACTION,
+} from '../actions/visualization_chat_action';
 import { VisualizationChatFlyout } from '../components/visualization_chat/visualization_chat_flyout';
 import { VisualizationChatContext } from './visualization_chat_service';
 import { VisualizationChatAssistantIntegrationService } from './visualization_chat_assistant_integration';
@@ -24,15 +27,15 @@ export class VisualizationChatIntegrationService {
   private assistantIntegration: VisualizationChatAssistantIntegrationService | null = null;
 
   constructor(
-    core: CoreStart, 
-    uiActions: UiActionsStart, 
+    core: CoreStart,
+    uiActions: UiActionsStart,
     embeddable: EmbeddableStart,
     assistantActions?: AssistantActions
   ) {
     this.core = core;
     this.uiActions = uiActions;
     this.embeddable = embeddable;
-    
+
     // Initialize assistant integration if actions are available
     if (assistantActions) {
       this.assistantIntegration = new VisualizationChatAssistantIntegrationService(
@@ -58,7 +61,7 @@ export class VisualizationChatIntegrationService {
   private registerVisualizationChatAction() {
     try {
       console.log('🔧 Starting visualization chat action registration...');
-      
+
       const action = new VisualizationChatAction({
         core: this.core,
         onChatOpen: this.handleChatOpen.bind(this),
@@ -67,20 +70,20 @@ export class VisualizationChatIntegrationService {
       console.log('🎯 Created visualization chat action:', {
         id: action.id,
         type: action.type,
-        order: action.order
+        order: action.order,
       });
 
       // Register the action with the context menu trigger
       this.uiActions.registerAction(action);
       console.log('📝 Action registered with UI actions service');
-      
+
       this.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);
       console.log('🔗 Action attached to context menu trigger');
 
       // Debug: Check if action was registered successfully
       const registeredActions = this.uiActions.getActions ? this.uiActions.getActions() : [];
       console.log('📋 Total registered actions:', registeredActions.length);
-      
+
       // Try to find our action
       const ourAction = registeredActions.find((a: any) => a.id === action.id);
       if (ourAction) {
@@ -90,10 +93,9 @@ export class VisualizationChatIntegrationService {
       }
 
       console.log('✅ Visualization chat action registration completed successfully');
-      
+
       // Store reference for debugging
       (window as any).__visualizationChatAction = action;
-      
     } catch (error) {
       console.error('❌ Failed to register visualization chat action:', error);
       throw error;
@@ -107,9 +109,9 @@ export class VisualizationChatIntegrationService {
     console.log('🎯 handleChatOpen called with:', {
       imageDataLength: imageData.length,
       visualizationTitle,
-      embeddableId
+      embeddableId,
     });
-    
+
     // Get current dashboard title if available
     const dashboardTitle = this.getCurrentDashboardTitle();
     console.log('📊 Dashboard title:', dashboardTitle);
@@ -124,7 +126,7 @@ export class VisualizationChatIntegrationService {
 
     console.log('🚀 About to open flyout with context:', {
       ...context,
-      imageData: `[${imageData.length} chars]` // Don't log the full image data
+      imageData: `[${imageData.length} chars]`, // Don't log the full image data
     });
 
     this.openVisualizationChatFlyout(context);
@@ -135,13 +137,13 @@ export class VisualizationChatIntegrationService {
    */
   private openVisualizationChatFlyout(context: VisualizationChatContext) {
     console.log('🚀 Opening visualization chat flyout with context:', context);
-    
+
     // Close any existing flyout
     this.closeChatFlyout();
 
     const handleStartChat = (message: string, imageData: string) => {
       console.log('💬 Starting chat with message:', message);
-      
+
       // Show success notification
       this.core.notifications.toasts.addSuccess({
         title: 'Chat started with visualization context',
@@ -176,9 +178,8 @@ export class VisualizationChatIntegrationService {
           onClose: handleClose,
         }
       );
-      
+
       console.log('✅ Visualization chat flyout mounted successfully');
-      
     } catch (error) {
       console.error('❌ Failed to open visualization chat flyout:', error);
       this.core.notifications.toasts.addError(error as Error, {
@@ -204,10 +205,10 @@ export class VisualizationChatIntegrationService {
     try {
       // Try to get dashboard title from the current URL or breadcrumbs
       const breadcrumbs = this.core.chrome.getBreadcrumbs();
-      const dashboardBreadcrumb = breadcrumbs.find(b => 
-        b.text && (b.text.includes('Dashboard') || b.href?.includes('dashboard'))
+      const dashboardBreadcrumb = breadcrumbs.find(
+        (b) => b.text && (b.text.includes('Dashboard') || b.href?.includes('dashboard'))
       );
-      
+
       if (dashboardBreadcrumb && dashboardBreadcrumb.text !== 'Dashboard') {
         return dashboardBreadcrumb.text;
       }
@@ -230,32 +231,36 @@ export class VisualizationChatIntegrationService {
   /**
    * Open the main chat interface with visualization context
    */
-  private async openMainChatWithContext(message: string, imageData: string, context: VisualizationChatContext) {
+  private async openMainChatWithContext(
+    message: string,
+    imageData: string,
+    context: VisualizationChatContext
+  ) {
     try {
       // Use assistant integration if available
       if (this.assistantIntegration && this.assistantIntegration.isAssistantAvailable()) {
         console.log('🤖 Using assistant integration for visualization chat');
-        
+
         // Send the message via assistant actions
         await this.assistantIntegration.sendVisualizationMessage(message, imageData, context);
-        
+
         // Create and open conversation
-        const conversationId = await this.assistantIntegration.createVisualizationConversation(context);
+        const conversationId = await this.assistantIntegration.createVisualizationConversation(
+          context
+        );
         this.assistantIntegration.openChatWithVisualization(conversationId);
-        
+
         this.core.notifications.toasts.addSuccess({
           title: 'Visualization Analysis Started',
           text: `AI is analyzing "${context.visualizationTitle}". The chat interface will open with your results.`,
           toastLifeTimeMs: 4000,
         });
-        
       } else {
         console.log('📡 Using fallback HTTP integration for visualization chat');
-        
+
         // Fallback to direct HTTP call
         await this.fallbackChatIntegration(message, imageData, context);
       }
-
     } catch (error) {
       console.error('Failed to open main chat with context:', error);
       this.core.notifications.toasts.addError(error as Error, {
@@ -268,7 +273,11 @@ export class VisualizationChatIntegrationService {
   /**
    * Fallback integration using direct HTTP calls
    */
-  private async fallbackChatIntegration(message: string, imageData: string, context: VisualizationChatContext) {
+  private async fallbackChatIntegration(
+    message: string,
+    imageData: string,
+    context: VisualizationChatContext
+  ) {
     // Create a visualization-specific conversation ID
     const conversationId = `viz-${context.embeddableId}-${Date.now()}`;
 
@@ -290,11 +299,13 @@ export class VisualizationChatIntegrationService {
           timestamp: context.timestamp,
         },
       },
-      images: [{
-        data: imageData,
-        mimeType: 'image/png',
-        filename: `${context.visualizationTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`,
-      }],
+      images: [
+        {
+          data: imageData,
+          mimeType: 'image/png',
+          filename: `${context.visualizationTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`,
+        },
+      ],
     };
 
     // Send the message to the chat service
@@ -313,11 +324,14 @@ export class VisualizationChatIntegrationService {
   /**
    * Build a contextual message for visualization analysis
    */
-  private buildVisualizationContextMessage(userMessage: string, context: VisualizationChatContext): string {
-    const dashboardContext = context.dashboardTitle 
-      ? ` from the dashboard "${context.dashboardTitle}"` 
+  private buildVisualizationContextMessage(
+    userMessage: string,
+    context: VisualizationChatContext
+  ): string {
+    const dashboardContext = context.dashboardTitle
+      ? ` from the dashboard "${context.dashboardTitle}"`
       : '';
-    
+
     return `I'm analyzing a visualization titled "${context.visualizationTitle}"${dashboardContext}. I've attached an image of this visualization.
 
 User question: ${userMessage}
@@ -364,9 +378,11 @@ If you need clarification about specific aspects of the visualization or the und
     try {
       // Try to find and trigger the existing chat interface
       // This could be done through various methods depending on the chat implementation
-      
+
       // Method 1: Try to find the chat button and click it
-      const chatButton = document.querySelector('[data-test-subj="chat-header-button"]') as HTMLElement;
+      const chatButton = document.querySelector(
+        '[data-test-subj="chat-header-button"]'
+      ) as HTMLElement;
       if (chatButton) {
         chatButton.click();
         console.log('Opened chat interface via header button');
@@ -381,15 +397,14 @@ If you need clarification about specific aspects of the visualization or the und
       console.log('Dispatched chat open event');
 
       // Method 3: Try to navigate to chat URL if available
-      const chatUrl = this.core.application.getUrlForApp('assistant', { 
-        path: `/chat?conversationId=${conversationId}` 
+      const chatUrl = this.core.application.getUrlForApp('assistant', {
+        path: `/chat?conversationId=${conversationId}`,
       });
-      
+
       if (chatUrl) {
         // Don't navigate immediately, just log for now
         console.log('Chat URL available:', chatUrl);
       }
-
     } catch (error) {
       console.warn('Could not automatically open chat interface:', error);
       // This is not critical - the user can manually open chat

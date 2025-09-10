@@ -80,7 +80,7 @@ export class UsageAnalyticsService {
 
   public trackEvent(event: UsageEvent): void {
     this.eventBuffer.push(event);
-    
+
     if (this.eventBuffer.length >= this.bufferSize) {
       this.flushEvents();
     }
@@ -195,13 +195,10 @@ export class UsageAnalyticsService {
     });
   }
 
-  public async generateReport(
-    startTime: number,
-    endTime: number
-  ): Promise<AnalyticsReport> {
+  public async generateReport(startTime: number, endTime: number): Promise<AnalyticsReport> {
     try {
       const events = await this.getEventsInRange(startTime, endTime);
-      
+
       return {
         period: { start: startTime, end: endTime },
         summary: this.calculateSummary(events),
@@ -237,14 +234,14 @@ export class UsageAnalyticsService {
           datasets.push(await this.getErrorRateTrend(timeRanges));
           break;
         case 'performance':
-          datasets.push(...await this.getPerformanceTrends(timeRanges));
+          datasets.push(...(await this.getPerformanceTrends(timeRanges)));
           break;
         default:
           throw new Error(`Unknown metric: ${metric}`);
       }
 
       return {
-        labels: timeRanges.map(range => this.formatTimeLabel(range.start, period)),
+        labels: timeRanges.map((range) => this.formatTimeLabel(range.start, period)),
         datasets,
       };
     } catch (error) {
@@ -253,21 +250,28 @@ export class UsageAnalyticsService {
     }
   }
 
-  public async getTopUsers(limit: number = 10): Promise<Array<{
-    userId: string;
-    eventCount: number;
-    lastActivity: number;
-    topFeatures: string[];
-  }>> {
+  public async getTopUsers(
+    limit: number = 10
+  ): Promise<
+    Array<{
+      userId: string;
+      eventCount: number;
+      lastActivity: number;
+      topFeatures: string[];
+    }>
+  > {
     try {
       const events = await this.getRecentEvents(7 * 24 * 60 * 60 * 1000); // Last 7 days
-      const userStats = new Map<string, {
-        eventCount: number;
-        lastActivity: number;
-        features: Map<string, number>;
-      }>();
+      const userStats = new Map<
+        string,
+        {
+          eventCount: number;
+          lastActivity: number;
+          features: Map<string, number>;
+        }
+      >();
 
-      events.forEach(event => {
+      events.forEach((event) => {
         if (!event.userId) return;
 
         const stats = userStats.get(event.userId) || {
@@ -344,11 +348,13 @@ export class UsageAnalyticsService {
       });
 
       const events: UsageEvent[] = [];
-      response.saved_objects.forEach(obj => {
+      response.saved_objects.forEach((obj) => {
         const eventBatch = obj.attributes as { events: UsageEvent[] };
-        events.push(...eventBatch.events.filter(
-          event => event.timestamp >= startTime && event.timestamp <= endTime
-        ));
+        events.push(
+          ...eventBatch.events.filter(
+            (event) => event.timestamp >= startTime && event.timestamp <= endTime
+          )
+        );
       });
 
       return events;
@@ -365,8 +371,8 @@ export class UsageAnalyticsService {
   }
 
   private calculateSummary(events: UsageEvent[]): AnalyticsReport['summary'] {
-    const uniqueUsers = new Set(events.map(e => e.userId).filter(Boolean)).size;
-    const uniqueSessions = new Set(events.map(e => e.sessionId).filter(Boolean)).size;
+    const uniqueUsers = new Set(events.map((e) => e.userId).filter(Boolean)).size;
+    const uniqueSessions = new Set(events.map((e) => e.sessionId).filter(Boolean)).size;
 
     return {
       totalEvents: events.length,
@@ -376,12 +382,12 @@ export class UsageAnalyticsService {
   }
 
   private analyzeContextExtractions(events: UsageEvent[]): AnalyticsReport['contextExtractions'] {
-    const extractions = events.filter(e => e.eventType === 'context_extraction');
-    const successful = extractions.filter(e => e.metadata.success);
+    const extractions = events.filter((e) => e.eventType === 'context_extraction');
+    const successful = extractions.filter((e) => e.metadata.success);
     const byContentType: Record<string, number> = {};
 
     let totalTime = 0;
-    extractions.forEach(event => {
+    extractions.forEach((event) => {
       totalTime += event.metadata.extractionTime || 0;
       if (event.metadata.contentTypes) {
         event.metadata.contentTypes.forEach((type: string) => {
@@ -399,12 +405,12 @@ export class UsageAnalyticsService {
   }
 
   private analyzeChatInteractions(events: UsageEvent[]): AnalyticsReport['chatInteractions'] {
-    const interactions = events.filter(e => e.eventType === 'chat_interaction');
-    const contextual = interactions.filter(e => e.metadata.queryType === 'contextual');
-    const fallback = interactions.filter(e => e.metadata.queryType === 'fallback');
+    const interactions = events.filter((e) => e.eventType === 'chat_interaction');
+    const contextual = interactions.filter((e) => e.metadata.queryType === 'contextual');
+    const fallback = interactions.filter((e) => e.metadata.queryType === 'fallback');
 
     let totalResponseTime = 0;
-    interactions.forEach(event => {
+    interactions.forEach((event) => {
       totalResponseTime += event.metadata.responseTime || 0;
     });
 
@@ -417,18 +423,17 @@ export class UsageAnalyticsService {
   }
 
   private analyzeFeatureUsage(events: UsageEvent[]): AnalyticsReport['featureUsage'] {
-    const featureEvents = events.filter(e => e.eventType === 'feature_usage');
+    const featureEvents = events.filter((e) => e.eventType === 'feature_usage');
     const featureCounts = new Map<string, number>();
 
-    featureEvents.forEach(event => {
+    featureEvents.forEach((event) => {
       const feature = event.metadata.feature;
       if (feature) {
         featureCounts.set(feature, (featureCounts.get(feature) || 0) + 1);
       }
     });
 
-    const sortedFeatures = Array.from(featureCounts.entries())
-      .sort((a, b) => b[1] - a[1]);
+    const sortedFeatures = Array.from(featureCounts.entries()).sort((a, b) => b[1] - a[1]);
 
     const total = featureEvents.length;
     const mostUsed = sortedFeatures.slice(0, 5).map(([feature, count]) => ({
@@ -437,21 +442,24 @@ export class UsageAnalyticsService {
       percentage: total > 0 ? (count / total) * 100 : 0,
     }));
 
-    const leastUsed = sortedFeatures.slice(-5).reverse().map(([feature, count]) => ({
-      feature,
-      count,
-      percentage: total > 0 ? (count / total) * 100 : 0,
-    }));
+    const leastUsed = sortedFeatures
+      .slice(-5)
+      .reverse()
+      .map(([feature, count]) => ({
+        feature,
+        count,
+        percentage: total > 0 ? (count / total) * 100 : 0,
+      }));
 
     return { mostUsed, leastUsed };
   }
 
   private analyzeErrors(events: UsageEvent[]): AnalyticsReport['errors'] {
-    const errorEvents = events.filter(e => e.eventType === 'error');
+    const errorEvents = events.filter((e) => e.eventType === 'error');
     const byType: Record<string, number> = {};
     let criticalErrors = 0;
 
-    errorEvents.forEach(event => {
+    errorEvents.forEach((event) => {
       const errorType = event.metadata.errorType;
       if (errorType) {
         byType[errorType] = (byType[errorType] || 0) + 1;
@@ -469,40 +477,41 @@ export class UsageAnalyticsService {
   }
 
   private analyzePerformance(events: UsageEvent[]): AnalyticsReport['performance'] {
-    const performanceEvents = events.filter(e => e.eventType === 'performance');
+    const performanceEvents = events.filter((e) => e.eventType === 'performance');
     const extractionTimes = performanceEvents
-      .filter(e => e.metadata.metric === 'extraction_time')
-      .map(e => e.metadata.value);
-    
-    const cacheHits = performanceEvents.filter(e => e.metadata.metric === 'cache_hit').length;
-    const cacheMisses = performanceEvents.filter(e => e.metadata.metric === 'cache_miss').length;
-    
+      .filter((e) => e.metadata.metric === 'extraction_time')
+      .map((e) => e.metadata.value);
+
+    const cacheHits = performanceEvents.filter((e) => e.metadata.metric === 'cache_hit').length;
+    const cacheMisses = performanceEvents.filter((e) => e.metadata.metric === 'cache_miss').length;
+
     const memoryUsages = performanceEvents
-      .filter(e => e.metadata.metric === 'memory_usage')
-      .map(e => e.metadata.value);
+      .filter((e) => e.metadata.metric === 'memory_usage')
+      .map((e) => e.metadata.value);
 
     return {
-      averageExtractionTime: extractionTimes.length > 0 
-        ? extractionTimes.reduce((a, b) => a + b, 0) / extractionTimes.length 
-        : 0,
-      cacheHitRate: (cacheHits + cacheMisses) > 0 
-        ? cacheHits / (cacheHits + cacheMisses) 
-        : 0,
+      averageExtractionTime:
+        extractionTimes.length > 0
+          ? extractionTimes.reduce((a, b) => a + b, 0) / extractionTimes.length
+          : 0,
+      cacheHitRate: cacheHits + cacheMisses > 0 ? cacheHits / (cacheHits + cacheMisses) : 0,
       memoryUsage: {
-        average: memoryUsages.length > 0 
-          ? memoryUsages.reduce((a, b) => a + b, 0) / memoryUsages.length 
-          : 0,
-        peak: memoryUsages.length > 0 
-          ? Math.max(...memoryUsages) 
-          : 0,
+        average:
+          memoryUsages.length > 0
+            ? memoryUsages.reduce((a, b) => a + b, 0) / memoryUsages.length
+            : 0,
+        peak: memoryUsages.length > 0 ? Math.max(...memoryUsages) : 0,
       },
     };
   }
 
-  private generateTimeRanges(period: 'hour' | 'day' | 'week' | 'month', count: number): Array<{ start: number; end: number }> {
+  private generateTimeRanges(
+    period: 'hour' | 'day' | 'week' | 'month',
+    count: number
+  ): Array<{ start: number; end: number }> {
     const ranges: Array<{ start: number; end: number }> = [];
     const now = Date.now();
-    
+
     let intervalMs: number;
     switch (period) {
       case 'hour':
@@ -520,7 +529,7 @@ export class UsageAnalyticsService {
     }
 
     for (let i = count - 1; i >= 0; i--) {
-      const end = now - (i * intervalMs);
+      const end = now - i * intervalMs;
       const start = end - intervalMs;
       ranges.push({ start, end });
     }
@@ -528,12 +537,14 @@ export class UsageAnalyticsService {
     return ranges;
   }
 
-  private async getContextExtractionTrend(timeRanges: Array<{ start: number; end: number }>): Promise<TrendData['datasets'][0]> {
+  private async getContextExtractionTrend(
+    timeRanges: Array<{ start: number; end: number }>
+  ): Promise<TrendData['datasets'][0]> {
     const data: number[] = [];
 
     for (const range of timeRanges) {
       const events = await this.getEventsInRange(range.start, range.end);
-      const extractions = events.filter(e => e.eventType === 'context_extraction');
+      const extractions = events.filter((e) => e.eventType === 'context_extraction');
       data.push(extractions.length);
     }
 
@@ -544,12 +555,14 @@ export class UsageAnalyticsService {
     };
   }
 
-  private async getChatInteractionTrend(timeRanges: Array<{ start: number; end: number }>): Promise<TrendData['datasets'][0]> {
+  private async getChatInteractionTrend(
+    timeRanges: Array<{ start: number; end: number }>
+  ): Promise<TrendData['datasets'][0]> {
     const data: number[] = [];
 
     for (const range of timeRanges) {
       const events = await this.getEventsInRange(range.start, range.end);
-      const interactions = events.filter(e => e.eventType === 'chat_interaction');
+      const interactions = events.filter((e) => e.eventType === 'chat_interaction');
       data.push(interactions.length);
     }
 
@@ -560,13 +573,15 @@ export class UsageAnalyticsService {
     };
   }
 
-  private async getErrorRateTrend(timeRanges: Array<{ start: number; end: number }>): Promise<TrendData['datasets'][0]> {
+  private async getErrorRateTrend(
+    timeRanges: Array<{ start: number; end: number }>
+  ): Promise<TrendData['datasets'][0]> {
     const data: number[] = [];
 
     for (const range of timeRanges) {
       const events = await this.getEventsInRange(range.start, range.end);
       const totalEvents = events.length;
-      const errorEvents = events.filter(e => e.eventType === 'error').length;
+      const errorEvents = events.filter((e) => e.eventType === 'error').length;
       const errorRate = totalEvents > 0 ? (errorEvents / totalEvents) * 100 : 0;
       data.push(errorRate);
     }
@@ -578,27 +593,30 @@ export class UsageAnalyticsService {
     };
   }
 
-  private async getPerformanceTrends(timeRanges: Array<{ start: number; end: number }>): Promise<TrendData['datasets']> {
+  private async getPerformanceTrends(
+    timeRanges: Array<{ start: number; end: number }>
+  ): Promise<TrendData['datasets']> {
     const extractionTimeData: number[] = [];
     const cacheHitRateData: number[] = [];
 
     for (const range of timeRanges) {
       const events = await this.getEventsInRange(range.start, range.end);
-      const performanceEvents = events.filter(e => e.eventType === 'performance');
-      
+      const performanceEvents = events.filter((e) => e.eventType === 'performance');
+
       const extractionTimes = performanceEvents
-        .filter(e => e.metadata.metric === 'extraction_time')
-        .map(e => e.metadata.value);
-      
-      const avgExtractionTime = extractionTimes.length > 0 
-        ? extractionTimes.reduce((a, b) => a + b, 0) / extractionTimes.length 
-        : 0;
-      
-      const cacheHits = performanceEvents.filter(e => e.metadata.metric === 'cache_hit').length;
-      const cacheMisses = performanceEvents.filter(e => e.metadata.metric === 'cache_miss').length;
-      const cacheHitRate = (cacheHits + cacheMisses) > 0 
-        ? (cacheHits / (cacheHits + cacheMisses)) * 100 
-        : 0;
+        .filter((e) => e.metadata.metric === 'extraction_time')
+        .map((e) => e.metadata.value);
+
+      const avgExtractionTime =
+        extractionTimes.length > 0
+          ? extractionTimes.reduce((a, b) => a + b, 0) / extractionTimes.length
+          : 0;
+
+      const cacheHits = performanceEvents.filter((e) => e.metadata.metric === 'cache_hit').length;
+      const cacheMisses = performanceEvents.filter((e) => e.metadata.metric === 'cache_miss')
+        .length;
+      const cacheHitRate =
+        cacheHits + cacheMisses > 0 ? (cacheHits / (cacheHits + cacheMisses)) * 100 : 0;
 
       extractionTimeData.push(avgExtractionTime);
       cacheHitRateData.push(cacheHitRate);
@@ -620,7 +638,7 @@ export class UsageAnalyticsService {
 
   private formatTimeLabel(timestamp: number, period: 'hour' | 'day' | 'week' | 'month'): string {
     const date = new Date(timestamp);
-    
+
     switch (period) {
       case 'hour':
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

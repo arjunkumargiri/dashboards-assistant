@@ -10,7 +10,7 @@ import { UIContext } from './ui_context';
 
 /**
  * Service Interfaces for Contextual Chat System
- * 
+ *
  * This file defines the service interfaces for the contextual chat feature,
  * extending the existing chat service with UI context awareness.
  */
@@ -24,9 +24,9 @@ export interface IContextualChatService {
    * Enhanced LLM request with UI context support
    */
   requestLLMWithContext(
-    payload: { 
-      messages: IMessage[]; 
-      input: IInput; 
+    payload: {
+      messages: IMessage[];
+      input: IInput;
       conversationId?: string;
       uiContext?: UIContext;
     },
@@ -42,9 +42,9 @@ export interface IContextualChatService {
    * Regenerate response with context awareness
    */
   regenerateWithContext(
-    payload: { 
-      conversationId: string; 
-      interactionId: string; 
+    payload: {
+      conversationId: string;
+      interactionId: string;
       rootAgentId: string;
       uiContext?: UIContext;
     },
@@ -359,14 +359,14 @@ export interface IContextualChatConfig {
 }
 
 // Import types from ui_context.ts
-import { 
-  ContentElement, 
-  ContentType, 
-  UIChange, 
-  PageContext, 
-  NavigationContext, 
-  TextContent, 
-  TableData, 
-  FormData, 
-  UserActionContext 
+import {
+  ContentElement,
+  ContentType,
+  UIChange,
+  PageContext,
+  NavigationContext,
+  TextContent,
+  TableData,
+  FormData,
+  UserActionContext,
 } from './ui_context';

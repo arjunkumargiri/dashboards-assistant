@@ -81,7 +81,13 @@ export class ContextualChatAdminService {
 
   public async getAdminDashboardData(): Promise<AdminDashboardData> {
     try {
-      const [settings, systemHealth, featureFlags, performanceMetrics, usageStatistics] = await Promise.all([
+      const [
+        settings,
+        systemHealth,
+        featureFlags,
+        performanceMetrics,
+        usageStatistics,
+      ] = await Promise.all([
         this.getAdminSettings(),
         this.getSystemHealth(),
         this.getFeatureFlagStatus(),
@@ -225,7 +231,7 @@ export class ContextualChatAdminService {
 
       // Save the change to persistent storage
       await this.saveSettingChange(settingId, value);
-      
+
       this.logger.info(`Successfully updated admin setting: ${settingId}`);
     } catch (error) {
       this.logger.error(`Failed to update admin setting ${settingId}`, error);
@@ -241,8 +247,8 @@ export class ContextualChatAdminService {
     checks.push({
       name: 'Configuration Validation',
       status: configValidation.isValid ? 'pass' : 'fail',
-      message: configValidation.isValid 
-        ? 'Configuration is valid' 
+      message: configValidation.isValid
+        ? 'Configuration is valid'
         : `Configuration has ${configValidation.errors.length} errors`,
       details: {
         errors: configValidation.errors,
@@ -255,8 +261,8 @@ export class ContextualChatAdminService {
     checks.push({
       name: 'Feature Flag Dependencies',
       status: flagValidation.isValid ? 'pass' : 'fail',
-      message: flagValidation.isValid 
-        ? 'All feature flag dependencies are satisfied' 
+      message: flagValidation.isValid
+        ? 'All feature flag dependencies are satisfied'
         : `${flagValidation.errors.length} dependency issues found`,
       details: {
         errors: flagValidation.errors,
@@ -274,9 +280,9 @@ export class ContextualChatAdminService {
     });
 
     // Determine overall system status
-    const hasFailures = checks.some(check => check.status === 'fail');
-    const hasWarnings = checks.some(check => check.status === 'warn');
-    
+    const hasFailures = checks.some((check) => check.status === 'fail');
+    const hasWarnings = checks.some((check) => check.status === 'warn');
+
     let overallStatus: SystemHealth['status'];
     if (hasFailures) {
       overallStatus = 'error';
@@ -417,7 +423,9 @@ export class ContextualChatAdminService {
     }
   }
 
-  private evaluatePerformanceHealth(metrics: PerformanceMetrics): { status: HealthCheck['status']; message: string } {
+  private evaluatePerformanceHealth(
+    metrics: PerformanceMetrics
+  ): { status: HealthCheck['status']; message: string } {
     const issues: string[] = [];
 
     if (metrics.averageExtractionTime > 5000) {
@@ -429,7 +437,8 @@ export class ContextualChatAdminService {
     if (metrics.errorRate > 0.05) {
       issues.push('High error rate');
     }
-    if (metrics.memoryUsage > 100 * 1024 * 1024) { // 100MB
+    if (metrics.memoryUsage > 100 * 1024 * 1024) {
+      // 100MB
       issues.push('High memory usage');
     }
 

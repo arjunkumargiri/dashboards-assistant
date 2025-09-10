@@ -44,15 +44,17 @@ export class VisualizationChatAction implements Action<VisualizationChatActionCo
     console.log('🔍 Visualization Chat Action - Checking compatibility for embeddable:', {
       type: embeddable.type,
       id: embeddable.id,
-      title: embeddable.getTitle?.() || 'No title'
+      title: embeddable.getTitle?.() || 'No title',
     });
 
     // TEMPORARY: Show for ALL embeddables for testing purposes
     // This will help us identify what types of embeddables you have
     const isCompatible = true; // Always compatible for now
-    
-    console.log(`🎯 Visualization Chat Action - Compatibility result: ${isCompatible} for type: ${embeddable.type} (SHOWING FOR ALL TYPES)`);
-    
+
+    console.log(
+      `🎯 Visualization Chat Action - Compatibility result: ${isCompatible} for type: ${embeddable.type} (SHOWING FOR ALL TYPES)`
+    );
+
     return isCompatible;
   }
 
@@ -79,13 +81,14 @@ export class VisualizationChatAction implements Action<VisualizationChatActionCo
       });
 
       // Get visualization title
-      const title = embeddable.getTitle() || i18n.translate('dashboardAssistant.visualizationChatAction.untitledVisualization', {
-        defaultMessage: 'Untitled Visualization',
-      });
+      const title =
+        embeddable.getTitle() ||
+        i18n.translate('dashboardAssistant.visualizationChatAction.untitledVisualization', {
+          defaultMessage: 'Untitled Visualization',
+        });
 
       // Open chat with the screenshot
       this.params.onChatOpen(screenshot.data, title, embeddable.id);
-
     } catch (error) {
       console.error('Failed to capture visualization:', error);
       this.params.core.notifications.toasts.addError(error as Error, {

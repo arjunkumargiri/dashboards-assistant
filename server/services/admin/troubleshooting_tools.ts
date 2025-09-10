@@ -86,19 +86,20 @@ export class TroubleshootingTools {
       run: async () => {
         const startTime = Date.now();
         const validation = this.configService.validateConfiguration();
-        
+
         return {
           passed: validation.isValid,
-          message: validation.isValid 
-            ? 'Configuration is valid' 
+          message: validation.isValid
+            ? 'Configuration is valid'
             : `Configuration has ${validation.errors.length} errors`,
           details: {
             errors: validation.errors,
             warnings: validation.warnings,
           },
-          suggestions: validation.errors.length > 0 
-            ? ['Review configuration errors and update settings accordingly']
-            : [],
+          suggestions:
+            validation.errors.length > 0
+              ? ['Review configuration errors and update settings accordingly']
+              : [],
           duration: Date.now() - startTime,
         };
       },
@@ -114,21 +115,23 @@ export class TroubleshootingTools {
         const startTime = Date.now();
         const dashboard = await this.performanceService.getDashboard();
         const issues = dashboard.systemHealth.issues;
-        
+
         return {
           passed: dashboard.systemHealth.status === 'healthy',
-          message: dashboard.systemHealth.status === 'healthy'
-            ? 'Performance metrics are healthy'
-            : `Performance issues detected: ${issues.length} issues`,
+          message:
+            dashboard.systemHealth.status === 'healthy'
+              ? 'Performance metrics are healthy'
+              : `Performance issues detected: ${issues.length} issues`,
           details: {
             status: dashboard.systemHealth.status,
             score: dashboard.systemHealth.score,
             issues,
             metrics: dashboard.realTimeMetrics,
           },
-          suggestions: issues.length > 0 
-            ? ['Review performance metrics and consider adjusting configuration']
-            : [],
+          suggestions:
+            issues.length > 0
+              ? ['Review performance metrics and consider adjusting configuration']
+              : [],
           duration: Date.now() - startTime,
         };
       },
@@ -142,7 +145,7 @@ export class TroubleshootingTools {
       severity: 'error',
       run: async () => {
         const startTime = Date.now();
-        
+
         try {
           // Try to create and delete a test object
           const testId = `test-${Date.now()}`;
@@ -151,9 +154,9 @@ export class TroubleshootingTools {
             { test: true },
             { id: testId }
           );
-          
+
           await this.savedObjectsClient.delete('contextual-chat-diagnostic-test', testId);
-          
+
           return {
             passed: true,
             message: 'Saved objects connectivity is working',
@@ -185,13 +188,13 @@ export class TroubleshootingTools {
         const memUsage = process.memoryUsage();
         const heapUsedMB = memUsage.heapUsed / 1024 / 1024;
         const heapTotalMB = memUsage.heapTotal / 1024 / 1024;
-        
+
         const isHighUsage = heapUsedMB > 100; // 100MB threshold
         const isVeryHighUsage = heapUsedMB > 200; // 200MB threshold
-        
+
         let message = `Memory usage: ${heapUsedMB.toFixed(1)}MB / ${heapTotalMB.toFixed(1)}MB`;
         const suggestions: string[] = [];
-        
+
         if (isVeryHighUsage) {
           message += ' (Very High)';
           suggestions.push('Consider restarting the service to free memory');
@@ -203,7 +206,7 @@ export class TroubleshootingTools {
         } else {
           message += ' (Normal)';
         }
-        
+
         return {
           passed: !isVeryHighUsage,
           message,
@@ -229,32 +232,34 @@ export class TroubleshootingTools {
         const startTime = Date.now();
         const featureFlags = this.configService.getFeatureFlags();
         const issues: string[] = [];
-        
+
         // Check common dependency issues
         if (featureFlags.enabled && !featureFlags.contentExtraction) {
           issues.push('Contextual chat is enabled but content extraction is disabled');
         }
-        
+
         if (featureFlags.contextualPrompts && !featureFlags.contentExtraction) {
           issues.push('Contextual prompts are enabled but content extraction is disabled');
         }
-        
+
         if (featureFlags.performanceOptimization && !featureFlags.enabled) {
           issues.push('Performance optimization is enabled but contextual chat is disabled');
         }
-        
+
         return {
           passed: issues.length === 0,
-          message: issues.length === 0 
-            ? 'Feature flags are consistent' 
-            : `Found ${issues.length} feature flag issues`,
+          message:
+            issues.length === 0
+              ? 'Feature flags are consistent'
+              : `Found ${issues.length} feature flag issues`,
           details: {
             featureFlags,
             issues,
           },
-          suggestions: issues.length > 0 
-            ? ['Review feature flag dependencies and enable required features']
-            : [],
+          suggestions:
+            issues.length > 0
+              ? ['Review feature flag dependencies and enable required features']
+              : [],
           duration: Date.now() - startTime,
         };
       },
@@ -268,28 +273,30 @@ export class TroubleshootingTools {
       severity: 'error',
       run: async () => {
         const startTime = Date.now();
-        
+
         try {
           // This would normally test actual extraction, but for now we'll simulate
           const mockExtractionTime = Math.random() * 1000 + 500; // 500-1500ms
           const success = mockExtractionTime < 5000; // Fail if > 5s
-          
-          await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
-          
+
+          await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate work
+
           return {
             passed: success,
-            message: success 
+            message: success
               ? `Context extraction test passed (${mockExtractionTime.toFixed(0)}ms)`
               : `Context extraction test failed (timeout: ${mockExtractionTime.toFixed(0)}ms)`,
             details: {
               extractionTime: mockExtractionTime,
               timeout: 5000,
             },
-            suggestions: success ? [] : [
-              'Check extraction timeout configuration',
-              'Review DOM structure complexity',
-              'Consider enabling lazy loading',
-            ],
+            suggestions: success
+              ? []
+              : [
+                  'Check extraction timeout configuration',
+                  'Review DOM structure complexity',
+                  'Consider enabling lazy loading',
+                ],
             duration: Date.now() - startTime,
           };
         } catch (error) {
@@ -320,8 +327,10 @@ export class TroubleshootingTools {
 
   public async runDiagnostics(testNames?: string[]): Promise<TroubleshootingReport> {
     const timestamp = Date.now();
-    const testsToRun = testNames 
-      ? testNames.map(name => this.diagnosticTests.get(name)).filter(Boolean) as DiagnosticTest[]
+    const testsToRun = testNames
+      ? (testNames
+          .map((name) => this.diagnosticTests.get(name))
+          .filter(Boolean) as DiagnosticTest[])
       : Array.from(this.diagnosticTests.values());
 
     this.logger.info(`Running ${testsToRun.length} diagnostic tests`);
@@ -335,7 +344,7 @@ export class TroubleshootingTools {
       try {
         this.logger.debug(`Running diagnostic test: ${test.name}`);
         const result = await test.run();
-        
+
         results.push({
           test: test.name,
           category: test.category,
@@ -353,7 +362,7 @@ export class TroubleshootingTools {
         }
       } catch (error) {
         this.logger.error(`Diagnostic test ${test.name} threw an error`, error);
-        
+
         results.push({
           test: test.name,
           category: test.category,
@@ -364,7 +373,7 @@ export class TroubleshootingTools {
             duration: 0,
           },
         });
-        
+
         errors++;
       }
     }
@@ -443,7 +452,7 @@ export class TroubleshootingTools {
         sortOrder: 'desc',
       });
 
-      return response.saved_objects.map(obj => obj.attributes as TroubleshootingReport);
+      return response.saved_objects.map((obj) => obj.attributes as TroubleshootingReport);
     } catch (error) {
       this.logger.error('Failed to get report history', error);
       return [];
@@ -477,28 +486,28 @@ export class TroubleshootingTools {
 
   private generateRecommendations(results: TroubleshootingReport['results']): string[] {
     const recommendations: string[] = [];
-    const failedTests = results.filter(r => !r.result.passed);
+    const failedTests = results.filter((r) => !r.result.passed);
 
     // Configuration recommendations
-    const configIssues = failedTests.filter(r => r.category === 'configuration');
+    const configIssues = failedTests.filter((r) => r.category === 'configuration');
     if (configIssues.length > 0) {
       recommendations.push('Review and update configuration settings to resolve validation errors');
     }
 
     // Performance recommendations
-    const performanceIssues = failedTests.filter(r => r.category === 'performance');
+    const performanceIssues = failedTests.filter((r) => r.category === 'performance');
     if (performanceIssues.length > 0) {
       recommendations.push('Consider adjusting performance settings or scaling resources');
     }
 
     // Connectivity recommendations
-    const connectivityIssues = failedTests.filter(r => r.category === 'connectivity');
+    const connectivityIssues = failedTests.filter((r) => r.category === 'connectivity');
     if (connectivityIssues.length > 0) {
       recommendations.push('Check network connectivity and service dependencies');
     }
 
     // Data recommendations
-    const dataIssues = failedTests.filter(r => r.category === 'data');
+    const dataIssues = failedTests.filter((r) => r.category === 'data');
     if (dataIssues.length > 0) {
       recommendations.push('Verify data extraction and processing functionality');
     }
@@ -517,11 +526,9 @@ export class TroubleshootingTools {
 
   private async saveReport(report: TroubleshootingReport): Promise<void> {
     try {
-      await this.savedObjectsClient.create(
-        'contextual-chat-diagnostic-reports',
-        report,
-        { id: `report-${report.timestamp}` }
-      );
+      await this.savedObjectsClient.create('contextual-chat-diagnostic-reports', report, {
+        id: `report-${report.timestamp}`,
+      });
     } catch (error) {
       this.logger.error('Failed to save diagnostic report', error);
       // Don't throw here as the report was still generated successfully

@@ -8,7 +8,7 @@ import { ContentElement, ContentType } from '../../../common/types/ui_context';
 
 /**
  * Content Prioritizer - Snapshot-based approach
- * 
+ *
  * This service prioritizes UI content elements based on relevance
  * to user queries and content importance.
  */
@@ -33,7 +33,7 @@ export class ContentPrioritizer {
         [ContentType.NAVIGATION]: 0.6,
         [ContentType.FILTER]: 1.4,
         [ContentType.METRIC]: 2.2,
-        [ContentType.ALERT]: 2.5
+        [ContentType.ALERT]: 2.5,
       };
     }
   }
@@ -52,29 +52,28 @@ export class ContentPrioritizer {
       }
 
       // Score each content element
-      const scoredContent = content.map(element => ({
+      const scoredContent = content.map((element) => ({
         element,
-        score: this.calculateContentScore(element, userQuery)
+        score: this.calculateContentScore(element, userQuery),
       }));
 
       // Sort by score (highest first) and take top elements
       const prioritized = scoredContent
         .sort((a, b) => b.score - a.score)
         .slice(0, maxElements)
-        .map(item => item.element);
+        .map((item) => item.element);
 
       this.logger.debug('Prioritized content elements', {
         totalElements: content.length,
         selectedElements: prioritized.length,
-        topScores: scoredContent.slice(0, 5).map(item => ({
+        topScores: scoredContent.slice(0, 5).map((item) => ({
           title: item.element.title,
           type: item.element.type,
-          score: item.score
-        }))
+          score: item.score,
+        })),
       });
 
       return prioritized;
-
     } catch (error) {
       this.logger.error('Error prioritizing content:', error);
       return content.slice(0, maxElements); // Fallback to first N elements
@@ -114,7 +113,7 @@ export class ContentPrioritizer {
 
     // Position bonus (elements higher on page are more important)
     if (element.position) {
-      const positionBonus = Math.max(0, 1 - (element.position.y / 1000)); // Normalize by typical page height
+      const positionBonus = Math.max(0, 1 - element.position.y / 1000); // Normalize by typical page height
       score += positionBonus * 0.3;
     }
 
@@ -146,8 +145,8 @@ export class ContentPrioritizer {
     }
 
     // Individual keyword matches
-    const queryWords = queryLower.split(/\s+/).filter(word => word.length > 2);
-    queryWords.forEach(word => {
+    const queryWords = queryLower.split(/\s+/).filter((word) => word.length > 2);
+    queryWords.forEach((word) => {
       if (textLower.includes(word)) {
         const weight = this.config.keywordWeights[word] || 1.0;
         score += weight * 0.5;
@@ -173,11 +172,11 @@ export class ContentPrioritizer {
     // Chart data relevance
     if (data.chartData) {
       score += 0.5; // Base score for having chart data
-      
+
       if (data.chartData.trends) {
         score += 0.3; // Bonus for trend information
       }
-      
+
       if (data.chartData.values && data.chartData.values.length > 0) {
         score += Math.min(0.5, data.chartData.values.length / 100); // More data points = higher score
       }
@@ -186,7 +185,7 @@ export class ContentPrioritizer {
     // Table data relevance
     if (data.tableData) {
       score += 0.4; // Base score for having table data
-      
+
       if (data.tableData.rows && data.tableData.rows.length > 0) {
         score += Math.min(0.4, data.tableData.rows.length / 50); // More rows = higher score
       }
@@ -203,7 +202,9 @@ export class ContentPrioritizer {
   /**
    * Get content prioritization statistics
    */
-  getStats(content: ContentElement[]): {
+  getStats(
+    content: ContentElement[]
+  ): {
     totalElements: number;
     typeDistribution: Record<string, number>;
     visibilityStats: { visible: number; inViewport: number };
@@ -212,10 +213,10 @@ export class ContentPrioritizer {
     let visible = 0;
     let inViewport = 0;
 
-    content.forEach(element => {
+    content.forEach((element) => {
       // Count by type
       typeDistribution[element.type] = (typeDistribution[element.type] || 0) + 1;
-      
+
       // Count visibility
       if (element.visibility?.isVisible) visible++;
       if (element.visibility?.inViewport) inViewport++;
@@ -224,7 +225,7 @@ export class ContentPrioritizer {
     return {
       totalElements: content.length,
       typeDistribution,
-      visibilityStats: { visible, inViewport }
+      visibilityStats: { visible, inViewport },
     };
   }
 }

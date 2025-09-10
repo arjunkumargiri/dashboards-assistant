@@ -103,7 +103,7 @@ export class PerformanceMonitoringService {
       },
     ];
 
-    defaultThresholds.forEach(threshold => {
+    defaultThresholds.forEach((threshold) => {
       this.thresholds.set(threshold.metric, threshold);
     });
   }
@@ -125,12 +125,12 @@ export class PerformanceMonitoringService {
     // Store in memory for real-time access
     const metricHistory = this.metrics.get(name) || [];
     metricHistory.push(metric);
-    
+
     // Keep only last 100 metrics per type
     if (metricHistory.length > 100) {
       metricHistory.shift();
     }
-    
+
     this.metrics.set(name, metricHistory);
 
     // Check thresholds
@@ -171,9 +171,9 @@ export class PerformanceMonitoringService {
     this.metrics.set('cache_operations', cacheMetrics);
 
     // Calculate hit rate
-    const hits = cacheMetrics.filter(m => m.value === 1).length;
+    const hits = cacheMetrics.filter((m) => m.value === 1).length;
     const hitRate = cacheMetrics.length > 0 ? hits / cacheMetrics.length : 0;
-    
+
     this.recordMetric('cache_hit_rate', hitRate, 'percentage');
   }
 
@@ -195,8 +195,8 @@ export class PerformanceMonitoringService {
     this.metrics.set('errors', errorMetrics);
 
     // Calculate error rate over last hour
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    const recentErrors = errorMetrics.filter(m => m.timestamp > oneHourAgo);
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const recentErrors = errorMetrics.filter((m) => m.timestamp > oneHourAgo);
     const totalOperations = this.getTotalOperationsLastHour();
     const errorRate = totalOperations > 0 ? recentErrors.length / totalOperations : 0;
 
@@ -244,7 +244,7 @@ export class PerformanceMonitoringService {
         sortOrder: 'desc',
       });
 
-      return response.saved_objects.map(obj => obj.attributes as PerformanceAlert);
+      return response.saved_objects.map((obj) => obj.attributes as PerformanceAlert);
     } catch (error) {
       this.logger.error('Failed to get alerts history', error);
       return [];
@@ -266,14 +266,10 @@ export class PerformanceMonitoringService {
     if (alert) {
       alert.resolved = true;
       alert.resolvedAt = Date.now();
-      
+
       try {
-        await this.savedObjectsClient.update(
-          'contextual-chat-performance-alerts',
-          alertId,
-          alert
-        );
-        
+        await this.savedObjectsClient.update('contextual-chat-performance-alerts', alertId, alert);
+
         this.activeAlerts.delete(alertId);
         this.logger.info(`Resolved performance alert: ${alertId}`);
       } catch (error) {
@@ -334,21 +330,16 @@ export class PerformanceMonitoringService {
     this.activeAlerts.set(alertId, alert);
 
     try {
-      await this.savedObjectsClient.create(
-        'contextual-chat-performance-alerts',
-        alert,
-        { id: alertId }
-      );
+      await this.savedObjectsClient.create('contextual-chat-performance-alerts', alert, {
+        id: alertId,
+      });
 
-      this.logger.warn(
-        `Performance alert: ${metric.name} ${level}`,
-        {
-          value: metric.value,
-          threshold,
-          unit: metric.unit,
-          context: metric.context,
-        }
-      );
+      this.logger.warn(`Performance alert: ${metric.name} ${level}`, {
+        value: metric.value,
+        threshold,
+        unit: metric.unit,
+        context: metric.context,
+      });
     } catch (error) {
       this.logger.error('Failed to save performance alert', error);
     }
@@ -367,10 +358,10 @@ export class PerformanceMonitoringService {
   }
 
   private async getTrends(): Promise<PerformanceDashboard['trends']> {
-    const extractionTime = this.getMetricHistory('extraction_time', 24).map(m => m.value);
-    const memoryUsage = this.getMetricHistory('memory_usage', 24).map(m => m.value);
-    const cacheHitRate = this.getMetricHistory('cache_hit_rate', 24).map(m => m.value);
-    const errorRate = this.getMetricHistory('error_rate', 24).map(m => m.value);
+    const extractionTime = this.getMetricHistory('extraction_time', 24).map((m) => m.value);
+    const memoryUsage = this.getMetricHistory('memory_usage', 24).map((m) => m.value);
+    const cacheHitRate = this.getMetricHistory('cache_hit_rate', 24).map((m) => m.value);
+    const errorRate = this.getMetricHistory('error_rate', 24).map((m) => m.value);
 
     return {
       extractionTime,
@@ -386,7 +377,7 @@ export class PerformanceMonitoringService {
 
     // Check each metric against thresholds
     const realTimeMetrics = this.getRealTimeMetrics();
-    
+
     Object.entries(realTimeMetrics).forEach(([name, metric]) => {
       const threshold = this.thresholds.get(name);
       if (!threshold) return;
@@ -396,7 +387,9 @@ export class PerformanceMonitoringService {
           issues.push(`Critical: Low cache hit rate (${(metric.value * 100).toFixed(1)}%)`);
           score -= 30;
         } else if (metric.value < threshold.warning) {
-          issues.push(`Warning: Cache hit rate below optimal (${(metric.value * 100).toFixed(1)}%)`);
+          issues.push(
+            `Warning: Cache hit rate below optimal (${(metric.value * 100).toFixed(1)}%)`
+          );
           score -= 15;
         }
       } else {
@@ -411,8 +404,12 @@ export class PerformanceMonitoringService {
     });
 
     // Check for active alerts
-    const criticalAlerts = Array.from(this.activeAlerts.values()).filter(a => a.level === 'critical');
-    const warningAlerts = Array.from(this.activeAlerts.values()).filter(a => a.level === 'warning');
+    const criticalAlerts = Array.from(this.activeAlerts.values()).filter(
+      (a) => a.level === 'critical'
+    );
+    const warningAlerts = Array.from(this.activeAlerts.values()).filter(
+      (a) => a.level === 'warning'
+    );
 
     score -= criticalAlerts.length * 20;
     score -= warningAlerts.length * 10;
@@ -444,16 +441,16 @@ export class PerformanceMonitoringService {
   }
 
   private getTotalOperationsLastHour(): number {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
     let totalOperations = 0;
 
     // Count extraction operations
     const extractions = this.metrics.get('extraction_time') || [];
-    totalOperations += extractions.filter(m => m.timestamp > oneHourAgo).length;
+    totalOperations += extractions.filter((m) => m.timestamp > oneHourAgo).length;
 
     // Count cache operations
     const cacheOps = this.metrics.get('cache_operations') || [];
-    totalOperations += cacheOps.filter(m => m.timestamp > oneHourAgo).length;
+    totalOperations += cacheOps.filter((m) => m.timestamp > oneHourAgo).length;
 
     return totalOperations;
   }
@@ -477,10 +474,10 @@ export class PerformanceMonitoringService {
   }
 
   private cleanupOldMetrics(): void {
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
 
     this.metrics.forEach((metricHistory, name) => {
-      const filtered = metricHistory.filter(m => m.timestamp > oneHourAgo);
+      const filtered = metricHistory.filter((m) => m.timestamp > oneHourAgo);
       this.metrics.set(name, filtered);
     });
   }

@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-  UIContext, 
-  ContentElement, 
-  ContentType, 
-  VisibilityState
+import {
+  UIContext,
+  ContentElement,
+  ContentType,
+  VisibilityState,
 } from '../../../../common/types/ui_context';
 
 describe('Contextual Chat Data Validation Tests', () => {
@@ -22,9 +22,9 @@ describe('Contextual Chat Data Validation Tests', () => {
           route: '/view/ecommerce-dashboard',
           breadcrumbs: [
             { text: 'Dashboard', href: '/app/dashboards', active: false },
-            { text: 'E-commerce Analytics Dashboard', active: true }
+            { text: 'E-commerce Analytics Dashboard', active: true },
           ],
-          metadata: { dashboardId: 'ecommerce-dashboard' }
+          metadata: { dashboardId: 'ecommerce-dashboard' },
         },
         content: [
           {
@@ -38,20 +38,20 @@ describe('Contextual Chat Data Validation Tests', () => {
                 values: [
                   { x: '2023-04', y: 45000 },
                   { x: '2023-05', y: 52000 },
-                  { x: '2023-06', y: 48000 }
+                  { x: '2023-06', y: 48000 },
                 ],
                 trends: { direction: 'increasing', confidence: 0.9, changePercent: 15.2 },
-                series: [{ name: 'Revenue', color: '#1f77b4', type: 'line', visible: true }]
-              }
+                series: [{ name: 'Revenue', color: '#1f77b4', type: 'line', visible: true }],
+              },
             },
             position: { x: 0, y: 0, width: 600, height: 400 },
             visibility: VisibilityState.VISIBLE,
-            metadata: { 
+            metadata: {
               embeddableId: 'revenue-chart',
               panelId: 'panel-1',
-              visualizationType: 'line'
+              visualizationType: 'line',
             },
-            relationships: []
+            relationships: [],
           },
           {
             id: 'top-products-table',
@@ -63,32 +63,32 @@ describe('Contextual Chat Data Validation Tests', () => {
                 rows: [
                   ['Wireless Headphones', '1,247', '$62,350', '+23%'],
                   ['Smart Watch', '892', '$89,200', '+18%'],
-                  ['Laptop Stand', '1,156', '$34,680', '+31%']
+                  ['Laptop Stand', '1,156', '$34,680', '+31%'],
                 ],
                 totalRows: 3,
-                pagination: { currentPage: 1, totalPages: 1, pageSize: 10, totalItems: 3 }
-              }
+                pagination: { currentPage: 1, totalPages: 1, pageSize: 10, totalItems: 3 },
+              },
             },
             position: { x: 600, y: 0, width: 600, height: 400 },
             visibility: VisibilityState.VISIBLE,
-            metadata: { 
+            metadata: {
               embeddableId: 'top-products-table',
-              panelId: 'panel-2'
+              panelId: 'panel-2',
             },
-            relationships: []
-          }
+            relationships: [],
+          },
         ],
         navigation: {
           currentApp: 'dashboard',
           currentRoute: '/view/ecommerce-dashboard',
           breadcrumbs: [
             { text: 'Dashboard', href: '/app/dashboards', active: false },
-            { text: 'E-commerce Analytics Dashboard', active: true }
+            { text: 'E-commerce Analytics Dashboard', active: true },
           ],
           availableApps: [
             { id: 'dashboard', title: 'Dashboard', url: '/app/dashboards' },
-            { id: 'discover', title: 'Discover', url: '/app/discover' }
-          ]
+            { id: 'discover', title: 'Discover', url: '/app/discover' },
+          ],
         },
         filters: [
           {
@@ -96,29 +96,29 @@ describe('Contextual Chat Data Validation Tests', () => {
             operator: 'is',
             value: 'Electronics',
             displayName: 'Category: Electronics',
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         timeRange: {
           from: '2023-04-01',
           to: '2024-03-31',
           mode: 'absolute',
-          displayName: 'Apr 1, 2023 - Mar 31, 2024'
+          displayName: 'Apr 1, 2023 - Mar 31, 2024',
         },
         userActions: [
-          { 
-            type: 'filter', 
-            timestamp: new Date().toISOString(), 
+          {
+            type: 'filter',
+            timestamp: new Date().toISOString(),
             elementId: 'category-filter',
-            details: { field: 'category', value: 'Electronics' } 
-          }
+            details: { field: 'category', value: 'Electronics' },
+          },
         ],
-        permissions: { 
-          canViewData: true, 
-          canModifyDashboard: true, 
-          canAccessApp: true 
+        permissions: {
+          canViewData: true,
+          canModifyDashboard: true,
+          canAccessApp: true,
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       // Assert
@@ -142,11 +142,11 @@ describe('Contextual Chat Data Validation Tests', () => {
           app: 'discover',
           route: '/',
           breadcrumbs: [{ text: 'Discover', active: true }],
-          metadata: { 
+          metadata: {
             indexPattern: 'logs-*',
             query: 'level:ERROR OR level:WARN',
-            columns: ['@timestamp', 'level', 'message', 'host']
-          }
+            columns: ['@timestamp', 'level', 'message', 'host'],
+          },
         },
         content: [
           {
@@ -157,22 +157,32 @@ describe('Contextual Chat Data Validation Tests', () => {
               tableData: {
                 headers: ['@timestamp', 'level', 'message', 'host'],
                 rows: [
-                  ['2024-03-15T14:32:15.123Z', 'ERROR', 'Database connection failed', 'web-server-01'],
-                  ['2024-03-15T14:31:45.892Z', 'ERROR', 'Failed to process payment', 'payment-service-02']
+                  [
+                    '2024-03-15T14:32:15.123Z',
+                    'ERROR',
+                    'Database connection failed',
+                    'web-server-01',
+                  ],
+                  [
+                    '2024-03-15T14:31:45.892Z',
+                    'ERROR',
+                    'Failed to process payment',
+                    'payment-service-02',
+                  ],
                 ],
                 totalRows: 1247,
-                pagination: { currentPage: 1, totalPages: 125, pageSize: 10, totalItems: 1247 }
-              }
+                pagination: { currentPage: 1, totalPages: 125, pageSize: 10, totalItems: 1247 },
+              },
             },
             position: { x: 0, y: 100, width: 1200, height: 600 },
             visibility: VisibilityState.VISIBLE,
-            metadata: { 
+            metadata: {
               indexPattern: 'logs-*',
               totalHits: 1247,
-              searchTime: '45ms'
+              searchTime: '45ms',
             },
-            relationships: []
-          }
+            relationships: [],
+          },
         ],
         navigation: {
           currentApp: 'discover',
@@ -180,8 +190,8 @@ describe('Contextual Chat Data Validation Tests', () => {
           breadcrumbs: [{ text: 'Discover', active: true }],
           availableApps: [
             { id: 'discover', title: 'Discover', url: '/app/discover' },
-            { id: 'dashboard', title: 'Dashboard', url: '/app/dashboards' }
-          ]
+            { id: 'dashboard', title: 'Dashboard', url: '/app/dashboards' },
+          ],
         },
         filters: [
           {
@@ -189,22 +199,22 @@ describe('Contextual Chat Data Validation Tests', () => {
             operator: 'is one of',
             value: ['ERROR', 'WARN'],
             displayName: 'level: ERROR OR WARN',
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         timeRange: {
           from: 'now-15m',
           to: 'now',
           mode: 'relative',
-          displayName: 'Last 15 minutes'
+          displayName: 'Last 15 minutes',
         },
         userActions: [],
-        permissions: { 
-          canViewData: true, 
-          canModifyDashboard: true, 
-          canAccessApp: true 
+        permissions: {
+          canViewData: true,
+          canModifyDashboard: true,
+          canAccessApp: true,
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       // Assert
@@ -226,9 +236,9 @@ describe('Contextual Chat Data Validation Tests', () => {
           route: '/edit/vis-123',
           breadcrumbs: [
             { text: 'Visualize', href: '/app/visualize', active: false },
-            { text: 'Edit Visualization', active: true }
+            { text: 'Edit Visualization', active: true },
           ],
-          metadata: { visualizationId: 'vis-123' }
+          metadata: { visualizationId: 'vis-123' },
         },
         content: [
           {
@@ -241,47 +251,43 @@ describe('Contextual Chat Data Validation Tests', () => {
                 values: [
                   { x: 'server-1', y: 85 },
                   { x: 'server-2', y: 92 },
-                  { x: 'server-3', y: 78 }
+                  { x: 'server-3', y: 78 },
                 ],
-                aggregations: [
-                  { field: 'cpu.percent', value: 85 }
-                ]
-              }
+                aggregations: [{ field: 'cpu.percent', value: 85 }],
+              },
             },
             position: { x: 200, y: 100, width: 800, height: 400 },
             visibility: VisibilityState.VISIBLE,
-            metadata: { 
+            metadata: {
               visualizationType: 'histogram',
-              indexPattern: 'metrics-*'
+              indexPattern: 'metrics-*',
             },
-            relationships: []
-          }
+            relationships: [],
+          },
         ],
         navigation: {
           currentApp: 'visualize',
           currentRoute: '/edit/vis-123',
           breadcrumbs: [
             { text: 'Visualize', href: '/app/visualize', active: false },
-            { text: 'Edit Visualization', active: true }
+            { text: 'Edit Visualization', active: true },
           ],
-          availableApps: [
-            { id: 'visualize', title: 'Visualize', url: '/app/visualize' }
-          ]
+          availableApps: [{ id: 'visualize', title: 'Visualize', url: '/app/visualize' }],
         },
         filters: [],
         timeRange: {
           from: 'now-15m',
           to: 'now',
           mode: 'relative',
-          displayName: 'Last 15 minutes'
+          displayName: 'Last 15 minutes',
         },
         userActions: [],
-        permissions: { 
-          canViewData: true, 
-          canModifyDashboard: true, 
-          canAccessApp: true 
+        permissions: {
+          canViewData: true,
+          canModifyDashboard: true,
+          canAccessApp: true,
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       // Assert
@@ -303,7 +309,7 @@ describe('Contextual Chat Data Validation Tests', () => {
           app: 'dashboard',
           route: '/view/large-dashboard',
           breadcrumbs: [],
-          metadata: {}
+          metadata: {},
         },
         content: Array.from({ length: 25 }, (_, i) => ({
           id: `vis-${i}`,
@@ -312,36 +318,36 @@ describe('Contextual Chat Data Validation Tests', () => {
           data: {
             chartData: {
               type: 'line',
-              values: Array.from({ length: 100 }, (_, j) => ({ 
-                x: j, 
-                y: Math.random() * 1000 
-              }))
-            }
+              values: Array.from({ length: 100 }, (_, j) => ({
+                x: j,
+                y: Math.random() * 1000,
+              })),
+            },
           },
-          position: { 
-            x: (i % 5) * 240, 
-            y: Math.floor(i / 5) * 200, 
-            width: 220, 
-            height: 180 
+          position: {
+            x: (i % 5) * 240,
+            y: Math.floor(i / 5) * 200,
+            width: 220,
+            height: 180,
           },
           visibility: i < 8 ? VisibilityState.VISIBLE : VisibilityState.HIDDEN,
           metadata: { embeddableId: `vis-${i}` },
-          relationships: []
+          relationships: [],
         })),
         navigation: {
           currentApp: 'dashboard',
           currentRoute: '/view/large-dashboard',
           breadcrumbs: [],
-          availableApps: []
+          availableApps: [],
         },
         filters: [],
         userActions: [],
-        permissions: { 
-          canViewData: true, 
-          canModifyDashboard: false, 
-          canAccessApp: true 
+        permissions: {
+          canViewData: true,
+          canModifyDashboard: false,
+          canAccessApp: true,
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       // Act
@@ -354,10 +360,14 @@ describe('Contextual Chat Data Validation Tests', () => {
       expect(processingTime).toBeLessThan(100); // Should serialize quickly
       expect(largeContext.content).toHaveLength(25);
       expect(contextSize).toBeGreaterThan(0);
-      
+
       // Verify visible vs hidden content
-      const visibleContent = largeContext.content.filter(c => c.visibility === VisibilityState.VISIBLE);
-      const hiddenContent = largeContext.content.filter(c => c.visibility === VisibilityState.HIDDEN);
+      const visibleContent = largeContext.content.filter(
+        (c) => c.visibility === VisibilityState.VISIBLE
+      );
+      const hiddenContent = largeContext.content.filter(
+        (c) => c.visibility === VisibilityState.HIDDEN
+      );
       expect(visibleContent).toHaveLength(8);
       expect(hiddenContent).toHaveLength(17);
     });
@@ -366,7 +376,7 @@ describe('Contextual Chat Data Validation Tests', () => {
       const apps = ['dashboard', 'discover', 'visualize'];
       const contexts: UIContext[] = [];
 
-      apps.forEach(app => {
+      apps.forEach((app) => {
         const context: UIContext = {
           page: {
             url: `/app/${app}`,
@@ -374,7 +384,7 @@ describe('Contextual Chat Data Validation Tests', () => {
             app,
             route: '/',
             breadcrumbs: [{ text: app, active: true }],
-            metadata: {}
+            metadata: {},
           },
           content: [
             {
@@ -385,23 +395,23 @@ describe('Contextual Chat Data Validation Tests', () => {
               position: { x: 0, y: 0, width: 400, height: 300 },
               visibility: VisibilityState.VISIBLE,
               metadata: {},
-              relationships: []
-            }
+              relationships: [],
+            },
           ],
           navigation: {
             currentApp: app,
             currentRoute: '/',
             breadcrumbs: [{ text: app, active: true }],
-            availableApps: []
+            availableApps: [],
           },
           filters: [],
           userActions: [],
-          permissions: { 
-            canViewData: true, 
-            canModifyDashboard: true, 
-            canAccessApp: true 
+          permissions: {
+            canViewData: true,
+            canModifyDashboard: true,
+            canAccessApp: true,
           },
-          extractedAt: new Date().toISOString()
+          extractedAt: new Date().toISOString(),
         };
         contexts.push(context);
       });
@@ -413,7 +423,7 @@ describe('Contextual Chat Data Validation Tests', () => {
         expect(context.navigation).toBeDefined();
         expect(context.permissions).toBeDefined();
         expect(context.extractedAt).toBeDefined();
-        
+
         expect(context.page.app).toBe(apps[index]);
         expect(context.content).toHaveLength(1);
         expect(context.content[0].visibility).toBe(VisibilityState.VISIBLE);
@@ -460,7 +470,7 @@ describe('Contextual Chat Data Validation Tests', () => {
         ContentType.MARKDOWN,
         ContentType.METRIC,
         ContentType.FORM,
-        ContentType.CONTROL_PANEL
+        ContentType.CONTROL_PANEL,
       ];
 
       contentTypes.forEach((type, index) => {
@@ -472,7 +482,7 @@ describe('Contextual Chat Data Validation Tests', () => {
           position: { x: 0, y: 0, width: 300, height: 200 },
           visibility: VisibilityState.VISIBLE,
           metadata: { contentType: type },
-          relationships: []
+          relationships: [],
         };
 
         expect(contentElement.type).toBe(type);
@@ -492,23 +502,23 @@ describe('Contextual Chat Data Validation Tests', () => {
           app: 'dashboard',
           route: '/',
           breadcrumbs: [],
-          metadata: {}
+          metadata: {},
         },
         content: [],
         navigation: {
           currentApp: 'dashboard',
           currentRoute: '/',
           breadcrumbs: [],
-          availableApps: []
+          availableApps: [],
         },
         filters: [],
         userActions: [],
-        permissions: { 
-          canViewData: true, 
-          canModifyDashboard: false, 
-          canAccessApp: true 
+        permissions: {
+          canViewData: true,
+          canModifyDashboard: false,
+          canAccessApp: true,
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       // Act & Assert - Should not throw when accessing defined properties
@@ -529,13 +539,13 @@ describe('Contextual Chat Data Validation Tests', () => {
           breadcrumbs: [
             { text: 'Home', href: '/', active: false },
             { text: 'Dashboards', href: '/app/dashboards', active: false },
-            { text: 'Complex Dashboard', active: true }
+            { text: 'Complex Dashboard', active: true },
           ],
           metadata: {
             dashboardId: 'complex-dashboard',
             version: '1.0.0',
-            tags: ['analytics', 'complex', 'test']
-          }
+            tags: ['analytics', 'complex', 'test'],
+          },
         },
         content: [
           {
@@ -547,22 +557,28 @@ describe('Contextual Chat Data Validation Tests', () => {
               chartData: {
                 type: 'multi-series',
                 values: [
-                  { x: 'Q1', y: 100, metadata: { quarter: 1, year: 2024, details: { revenue: 50000, costs: 30000 } } },
-                  { x: 'Q2', y: 150, metadata: { quarter: 2, year: 2024, details: { revenue: 75000, costs: 45000 } } }
+                  {
+                    x: 'Q1',
+                    y: 100,
+                    metadata: { quarter: 1, year: 2024, details: { revenue: 50000, costs: 30000 } },
+                  },
+                  {
+                    x: 'Q2',
+                    y: 150,
+                    metadata: { quarter: 2, year: 2024, details: { revenue: 75000, costs: 45000 } },
+                  },
                 ],
                 series: [
                   { name: 'Revenue', color: '#00ff00', type: 'line', visible: true },
-                  { name: 'Costs', color: '#ff0000', type: 'bar', visible: true }
+                  { name: 'Costs', color: '#ff0000', type: 'bar', visible: true },
                 ],
-                trends: { 
-                  direction: 'increasing', 
-                  confidence: 0.95, 
+                trends: {
+                  direction: 'increasing',
+                  confidence: 0.95,
                   changePercent: 25,
-                  anomalies: [
-                    { timestamp: '2024-Q2', value: 150, severity: 'low' }
-                  ]
-                }
-              }
+                  anomalies: [{ timestamp: '2024-Q2', value: 150, severity: 'low' }],
+                },
+              },
             },
             position: { x: 0, y: 0, width: 800, height: 600, zIndex: 1 },
             visibility: VisibilityState.VISIBLE,
@@ -573,13 +589,13 @@ describe('Contextual Chat Data Validation Tests', () => {
               lastUpdated: new Date().toISOString(),
               dataAttributes: {
                 'data-test-id': 'complex-visualization',
-                'data-panel-type': 'visualization'
-              }
+                'data-panel-type': 'visualization',
+              },
             },
             relationships: [
-              { type: 'related', targetId: 'related-table', description: 'Shows related data' }
-            ]
-          }
+              { type: 'related', targetId: 'related-table', description: 'Shows related data' },
+            ],
+          },
         ],
         navigation: {
           currentApp: 'dashboard',
@@ -587,13 +603,13 @@ describe('Contextual Chat Data Validation Tests', () => {
           breadcrumbs: [
             { text: 'Home', href: '/', active: false },
             { text: 'Dashboards', href: '/app/dashboards', active: false },
-            { text: 'Complex Dashboard', active: true }
+            { text: 'Complex Dashboard', active: true },
           ],
           availableApps: [
             { id: 'dashboard', title: 'Dashboard', url: '/app/dashboards' },
             { id: 'discover', title: 'Discover', url: '/app/discover' },
-            { id: 'visualize', title: 'Visualize', url: '/app/visualize' }
-          ]
+            { id: 'visualize', title: 'Visualize', url: '/app/visualize' },
+          ],
         },
         filters: [
           {
@@ -603,40 +619,40 @@ describe('Contextual Chat Data Validation Tests', () => {
             displayName: 'Category: Electronics, Software, Hardware',
             enabled: true,
             negated: false,
-            pinned: true
-          }
+            pinned: true,
+          },
         ],
         timeRange: {
           from: '2024-01-01T00:00:00Z',
           to: '2024-12-31T23:59:59Z',
           mode: 'absolute',
           displayName: 'Full Year 2024',
-          refreshInterval: { pause: false, value: 30000 }
+          refreshInterval: { pause: false, value: 30000 },
         },
         userActions: [
-          { 
-            type: 'click', 
-            timestamp: new Date().toISOString(), 
+          {
+            type: 'click',
+            timestamp: new Date().toISOString(),
             elementId: 'complex-vis',
-            details: { 
+            details: {
               coordinates: { x: 400, y: 300 },
               dataPoint: { x: 'Q2', y: 150 },
-              seriesName: 'Revenue'
-            } 
-          }
+              seriesName: 'Revenue',
+            },
+          },
         ],
-        permissions: { 
-          canViewData: true, 
-          canModifyDashboard: true, 
+        permissions: {
+          canViewData: true,
+          canModifyDashboard: true,
           canAccessApp: true,
           restrictedFields: ['sensitive_data'],
           dataSourcePermissions: {
             'logs-*': true,
             'metrics-*': true,
-            'sensitive-*': false
-          }
+            'sensitive-*': false,
+          },
         },
-        extractedAt: new Date().toISOString()
+        extractedAt: new Date().toISOString(),
       };
 
       // Act & Assert

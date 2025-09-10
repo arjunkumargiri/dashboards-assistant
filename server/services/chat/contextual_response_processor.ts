@@ -9,7 +9,7 @@ import { UIContext } from '../../../common/types/ui_context';
 
 /**
  * Contextual Response Processor - Snapshot-based approach
- * 
+ *
  * This service processes chat responses and enhances them with
  * contextual information when relevant.
  */
@@ -40,9 +40,8 @@ export class ContextualResponseProcessor {
 
       return {
         ...response,
-        messages: processedMessages
+        messages: processedMessages,
       };
-
     } catch (error) {
       this.logger.error('Error processing contextual response:', error);
       return response; // Return original response on error
@@ -52,10 +51,7 @@ export class ContextualResponseProcessor {
   /**
    * Enhance response message with contextual metadata
    */
-  private async enhanceResponseMessage(
-    message: IMessage,
-    uiContext: UIContext
-  ): Promise<IMessage> {
+  private async enhanceResponseMessage(message: IMessage, uiContext: UIContext): Promise<IMessage> {
     try {
       // Add contextual metadata to the message
       const contextualMetadata = {
@@ -64,12 +60,12 @@ export class ContextualResponseProcessor {
           title: uiContext.page?.title,
           contentElements: uiContext.content?.length || 0,
           hasFilters: (uiContext.filters?.length || 0) > 0,
-          timeRange: uiContext.timeRange?.displayName
+          timeRange: uiContext.timeRange?.displayName,
         },
         processingInfo: {
           contextEnhanced: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
 
       // Check if response mentions specific visualizations or data
@@ -80,10 +76,9 @@ export class ContextualResponseProcessor {
         content: enhancedContent,
         metadata: {
           ...message.metadata,
-          contextual: contextualMetadata
-        }
+          contextual: contextualMetadata,
+        },
       };
-
     } catch (error) {
       this.logger.error('Error enhancing response message:', error);
       return message;
@@ -107,11 +102,11 @@ export class ContextualResponseProcessor {
 
     // Extract insights from visible content
     if (uiContext.content) {
-      uiContext.content.forEach(item => {
+      uiContext.content.forEach((item) => {
         if (item.data?.chartData?.trends) {
           insights.push(`${item.title} shows ${item.data.chartData.trends.direction} trend`);
         }
-        
+
         if (item.data?.tableData?.totalRows) {
           insights.push(`${item.title} contains ${item.data.tableData.totalRows} records`);
         }
@@ -120,7 +115,7 @@ export class ContextualResponseProcessor {
 
     // Extract insights from filters
     if (uiContext.filters && uiContext.filters.length > 0) {
-      const activeFilters = uiContext.filters.filter(f => f.enabled);
+      const activeFilters = uiContext.filters.filter((f) => f.enabled);
       if (activeFilters.length > 0) {
         insights.push(`Data is filtered by ${activeFilters.length} active filter(s)`);
       }

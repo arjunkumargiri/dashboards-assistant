@@ -4,12 +4,12 @@
  */
 
 import { ApiResponse } from '@opensearch-project/opensearch';
+import { Readable } from 'stream';
 import { OpenSearchClient, RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ML_COMMONS_BASE_API, ROOT_AGENT_CONFIG_ID } from '../../utils/constants';
 import { getAgentIdByConfigName } from '../../routes/get_agent';
-import { Readable } from 'stream';
 
 interface AgentRunPayload {
   question?: string;
