@@ -68,9 +68,36 @@ export const VisualizationChatFlyout: React.FC<VisualizationChatFlyoutProps> = (
 
     setIsLoading(true);
     try {
+      // Validate image data
+      if (!context.imageData || context.imageData.length === 0) {
+        throw new Error('Visualization image data is missing');
+      }
+
+      // Show progress notification
+      const progressToast = core.notifications.toasts.addInfo({
+        title: i18n.translate('dashboardAssistant.visualizationChat.sendingToAI', {
+          defaultMessage: 'Sending visualization to AI for analysis...',
+        }),
+        toastLifeTimeMs: 2000,
+      });
+
       // Start the chat with the user query and image
-      onStartChat(userQuery, context.imageData);
+      await onStartChat(userQuery, context.imageData);
+      
+      // Close the flyout after successful submission
       onClose();
+
+      // Show success message
+      core.notifications.toasts.addSuccess({
+        title: i18n.translate('dashboardAssistant.visualizationChat.chatStarted', {
+          defaultMessage: 'Visualization analysis started',
+        }),
+        text: i18n.translate('dashboardAssistant.visualizationChat.chatStartedText', {
+          defaultMessage: 'AI is analyzing your visualization. Check the chat interface for insights.',
+        }),
+        toastLifeTimeMs: 4000,
+      });
+
     } catch (error) {
       console.error('Failed to start chat:', error);
       core.notifications.toasts.addError(error as Error, {

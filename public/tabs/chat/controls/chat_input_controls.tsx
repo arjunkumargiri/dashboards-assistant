@@ -1127,13 +1127,19 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
     console.log('📋 Skipping dashboard context extraction (temporarily disabled to avoid context overflow)');
     const dashboardContext = null; // Disabled for now
 
-    // Create input message with screenshot if available
+    // Check for pending visualization data from "Ask AI" button
+    const pendingVisualizationData = (window as any).__pendingVisualizationData;
+    
+    // Create input message with screenshot or visualization data if available
     const inputMessage: IMessage = {
       type: 'input',
       content: userInput,
       contentType: 'text',
       context: {
         appId: chatContext.appId,
+        ...(pendingVisualizationData && {
+          content: `Visualization: ${pendingVisualizationData.visualizationTitle}`
+        })
       },
       ...(screenshot && {
         images: [{
@@ -1141,8 +1147,28 @@ export const ChatInputControls: React.FC<ChatInputControlsProps> = (props) => {
           mimeType: screenshot.mimeType,
           filename: screenshot.filename
         }]
+      }),
+      ...(pendingVisualizationData && !screenshot && {
+        images: [{
+          data: pendingVisualizationData.imageData,
+          mimeType: pendingVisualizationData.mimeType,
+          filename: pendingVisualizationData.filename
+        }]
       })
     };
+
+    // Clear pending visualization data after using it
+    if (pendingVisualizationData) {
+      delete (window as any).__pendingVisualizationData;
+      
+      // Remove the image preview from UI
+      const preview = document.querySelector('.visualization-image-preview');
+      if (preview) {
+        preview.remove();
+      }
+      
+      console.log('📊 Used pending visualization data in message');
+    }
 
     // Validate input message before sending
     if (!inputMessage.content || inputMessage.content.trim() === '') {

@@ -72,39 +72,72 @@ If you cannot see the image clearly or need more specific data details, please l
    * Generate suggested questions based on visualization type
    */
   public generateSuggestedQuestions(visualizationTitle: string): string[] {
-    const baseQuestions = [
-      'What trends do you see in this visualization?',
-      'What insights can you provide about this data?',
-      'Are there any anomalies or outliers in this chart?',
-      'What recommendations do you have based on this data?',
-      'Can you explain what this visualization is showing?',
-    ];
-
-    // Add context-specific questions based on title keywords
     const titleLower = visualizationTitle.toLowerCase();
     const contextualQuestions: string[] = [];
 
-    if (titleLower.includes('time') || titleLower.includes('trend')) {
-      contextualQuestions.push('What time-based patterns do you notice?');
-      contextualQuestions.push('How has this metric changed over time?');
+    // Time-series and trend analysis
+    if (titleLower.includes('time') || titleLower.includes('trend') || titleLower.includes('over time')) {
+      contextualQuestions.push('What time-based patterns and trends do you notice?');
+      contextualQuestions.push('Are there any seasonal or cyclical patterns?');
+      contextualQuestions.push('What caused the significant changes over time?');
     }
 
-    if (titleLower.includes('error') || titleLower.includes('failure')) {
-      contextualQuestions.push('What might be causing these errors?');
+    // Error and failure analysis
+    if (titleLower.includes('error') || titleLower.includes('failure') || titleLower.includes('exception')) {
+      contextualQuestions.push('What might be causing these errors or failures?');
       contextualQuestions.push('How can we reduce the error rate?');
+      contextualQuestions.push('Are there patterns in when errors occur?');
     }
 
-    if (titleLower.includes('performance') || titleLower.includes('latency')) {
-      contextualQuestions.push('How can we improve performance based on this data?');
-      contextualQuestions.push('What are the performance bottlenecks?');
+    // Performance and latency analysis
+    if (titleLower.includes('performance') || titleLower.includes('latency') || titleLower.includes('response')) {
+      contextualQuestions.push('What are the main performance bottlenecks?');
+      contextualQuestions.push('How can we optimize performance based on this data?');
+      contextualQuestions.push('What performance thresholds should we be concerned about?');
     }
 
-    if (titleLower.includes('user') || titleLower.includes('traffic')) {
-      contextualQuestions.push('What user behavior patterns do you see?');
-      contextualQuestions.push('How can we improve user experience?');
+    // User behavior and traffic analysis
+    if (titleLower.includes('user') || titleLower.includes('traffic') || titleLower.includes('visitor')) {
+      contextualQuestions.push('What user behavior patterns do you observe?');
+      contextualQuestions.push('How can we improve user experience based on this data?');
+      contextualQuestions.push('What insights can help drive user engagement?');
     }
 
-    return [...contextualQuestions, ...baseQuestions].slice(0, 5);
+    // Sales and revenue analysis
+    if (titleLower.includes('sales') || titleLower.includes('revenue') || titleLower.includes('conversion')) {
+      contextualQuestions.push('What factors are driving sales performance?');
+      contextualQuestions.push('How can we improve conversion rates?');
+      contextualQuestions.push('What revenue optimization opportunities do you see?');
+    }
+
+    // System monitoring and metrics
+    if (titleLower.includes('cpu') || titleLower.includes('memory') || titleLower.includes('disk') || titleLower.includes('system')) {
+      contextualQuestions.push('Are there any system resource concerns?');
+      contextualQuestions.push('What system optimization recommendations do you have?');
+      contextualQuestions.push('How can we prevent system issues based on these metrics?');
+    }
+
+    // Geographic and location data
+    if (titleLower.includes('map') || titleLower.includes('geo') || titleLower.includes('location') || titleLower.includes('region')) {
+      contextualQuestions.push('What geographic patterns do you notice?');
+      contextualQuestions.push('How do different regions compare?');
+      contextualQuestions.push('What location-based insights can guide our strategy?');
+    }
+
+    // General analysis questions
+    const baseQuestions = [
+      'What are the key insights from this visualization?',
+      'Are there any anomalies or outliers that need attention?',
+      'What actionable recommendations do you have?',
+      'What should we investigate further based on this data?',
+      'How does this data compare to expected benchmarks?',
+    ];
+
+    // Combine contextual and base questions, prioritizing contextual ones
+    const allQuestions = [...contextualQuestions, ...baseQuestions];
+    
+    // Return up to 6 unique questions
+    return Array.from(new Set(allQuestions)).slice(0, 6);
   }
 
   /**

@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { v4 as uuid } from 'uuid';
+import * as uuid from 'uuid';
 import { htmlIdGenerator } from '@elastic/eui';
 import { IMessage } from '../../common/types/chat_saved_object_attributes';
 
 const buildBasicGraph = () => ({
-  id: 'paragraph_' + uuid(),
+  id: 'paragraph_' + uuid.v4(),
   dateCreated: new Date().toISOString(),
   dateModified: new Date().toISOString(),
   input: {

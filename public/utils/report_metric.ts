@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import * as uuid from 'uuid';
 import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
@@ -14,6 +14,6 @@ export const reportMetric = (
   metricType: UiStatsMetricType = METRIC_TYPE.CLICK
 ) => {
   if (usageCollection) {
-    usageCollection.reportUiStats(metricAppName, metricType, metric + '-' + uuidv4());
+    usageCollection.reportUiStats(metricAppName, metricType, metric + '-' + uuid.v4());
   }
 };

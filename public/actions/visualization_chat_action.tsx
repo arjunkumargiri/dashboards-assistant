@@ -40,11 +40,20 @@ export class VisualizationChatAction implements Action<VisualizationChatActionCo
   }
 
   public async isCompatible({ embeddable }: VisualizationChatActionContext): Promise<boolean> {
-    // Only show for visualization embeddables
-    return embeddable.type === 'visualization' || 
-           embeddable.type === 'lens' || 
-           embeddable.type === 'map' ||
-           embeddable.type === 'vega';
+    // Debug: Log embeddable type to help with troubleshooting
+    console.log('🔍 Visualization Chat Action - Checking compatibility for embeddable:', {
+      type: embeddable.type,
+      id: embeddable.id,
+      title: embeddable.getTitle?.() || 'No title'
+    });
+
+    // TEMPORARY: Show for ALL embeddables for testing purposes
+    // This will help us identify what types of embeddables you have
+    const isCompatible = true; // Always compatible for now
+    
+    console.log(`🎯 Visualization Chat Action - Compatibility result: ${isCompatible} for type: ${embeddable.type} (SHOWING FOR ALL TYPES)`);
+    
+    return isCompatible;
   }
 
   public async execute({ embeddable }: VisualizationChatActionContext): Promise<void> {
@@ -63,15 +72,7 @@ export class VisualizationChatAction implements Action<VisualizationChatActionCo
         return;
       }
 
-      // Show loading toast
-      const loadingToast = this.params.core.notifications.toasts.addInfo({
-        title: i18n.translate('dashboardAssistant.visualizationChatAction.capturing', {
-          defaultMessage: 'Capturing visualization...',
-        }),
-        toastLifeTimeMs: 2000,
-      });
-
-      // Capture screenshot of the visualization
+      // Capture screenshot of the visualization (no notifications - they're distracting)
       const screenshot = await ScreenshotService.captureElementScreenshot(embeddableElement, {
         format: 'png',
         quality: 0.9,
@@ -84,13 +85,6 @@ export class VisualizationChatAction implements Action<VisualizationChatActionCo
 
       // Open chat with the screenshot
       this.params.onChatOpen(screenshot.data, title, embeddable.id);
-
-      this.params.core.notifications.toasts.addSuccess({
-        title: i18n.translate('dashboardAssistant.visualizationChatAction.success', {
-          defaultMessage: 'Visualization captured successfully',
-        }),
-        toastLifeTimeMs: 2000,
-      });
 
     } catch (error) {
       console.error('Failed to capture visualization:', error);

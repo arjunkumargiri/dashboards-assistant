@@ -7,7 +7,7 @@ import { RequestHandlerContext } from '../../../../../src/core/server';
 import { IMessage, IInput } from '../../../common/types/chat_saved_object_attributes';
 import { ChatService } from './chat_service';
 import { ConfigSchema } from '../../../common/types/config';
-import { v4 as uuidv4 } from 'uuid';
+import * as uuid from 'uuid';
 import { Readable } from 'stream';
 
 interface OpenSearchAgentsChatRequest {
@@ -413,14 +413,14 @@ export class OpenSearchAgentsChatService implements ChatService {
     // Generate or validate session ID as UUID
     let sessionId = conversationId;
     if (!sessionId) {
-      sessionId = uuidv4();
+      sessionId = uuid.v4();
       logger.debug('Generated new session ID:', { sessionId });
     } else {
       // Validate existing session ID is UUID format, if not generate new one
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(sessionId)) {
         logger.warn('Invalid session ID format, generating new UUID:', { oldSessionId: sessionId });
-        sessionId = uuidv4();
+        sessionId = uuid.v4();
       }
     }
 
@@ -531,7 +531,7 @@ export class OpenSearchAgentsChatService implements ChatService {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if (!sessionId || !uuidRegex.test(sessionId)) {
       logger.warn('Invalid session ID for regeneration, generating new UUID:', { oldSessionId: sessionId });
-      sessionId = uuidv4();
+      sessionId = uuid.v4();
     }
 
     // For OpenSearch-Agents, regeneration is handled by sending the same session_id

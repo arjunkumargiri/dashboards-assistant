@@ -75,6 +75,9 @@ import {
 } from './components/visualization/text2viz';
 import { DEFAULT_DATA, createStorage } from '../../../src/plugins/data/common';
 import { initializeContextualChatPublicServices } from './services/contextual_chat_initializer';
+import { VisualizationChatExistingUIIntegration } from './services/visualization_chat_existing_ui_integration';
+import { SimpleButtonInjector } from './services/simple_button_injector';
+
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -104,6 +107,8 @@ export class AssistantPlugin
   private dataSourceService: DataSourceService;
   private resetChatSubscription: Subscription | undefined;
   private assistantService = new AssistantService();
+  private visualizationChatService: VisualizationChatExistingUIIntegration | undefined;
+  private assistantActions: AssistantActions | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -121,6 +126,7 @@ export class AssistantPlugin
     const messageRenderers: Record<string, MessageRenderer> = {};
     const actionExecutors: Record<string, ActionExecutor> = {};
     const assistantActions: AssistantActions = {} as AssistantActions;
+    this.assistantActions = assistantActions;
     /**
      * Returns {@link UserAccountResponse}. Provides user name.
      */
@@ -366,7 +372,7 @@ export class AssistantPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: AssistantPluginStartDependencies
+    { data, expressions, uiActions, embeddable }: AssistantPluginStartDependencies
   ): AssistantStart {
     const assistantServiceStart = this.assistantService.start(core.http);
     setCoreStart(core);
@@ -461,6 +467,40 @@ export class AssistantPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setExpressions(expressions);
     setHttp(core.http);
+
+    // Initialize visualization chat integration with existing UI
+    if (core.application.capabilities?.assistant?.chatEnabled) {
+      try {
+        this.visualizationChatService = new VisualizationChatExistingUIIntegration(
+          core,
+          uiActions,
+          embeddable,
+          this.assistantActions
+        );
+        this.visualizationChatService.setup();
+        
+        // Standalone button injector disabled - using dropdown menu instead
+        // setTimeout(() => {
+        //   try {
+        //     const buttonInjector = new SimpleButtonInjector(
+        //       core,
+        //       uiActions,
+        //       embeddable,
+        //       this.visualizationChatService
+        //     );
+        //     buttonInjector.start();
+        //     console.log('✅ Simple Ask AI button injector started successfully');
+        //   } catch (error) {
+        //     console.error('Failed to initialize simple Ask AI button injector:', error);
+        //   }
+        // }, 1000); // Small delay to ensure UI is ready
+        
+        console.log('✅ Visualization chat integration with dropdown menu initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize visualization chat integration:', error);
+        // Continue with plugin initialization
+      }
+    }
 
     return {
       dataSource: this.dataSourceService.start(),
